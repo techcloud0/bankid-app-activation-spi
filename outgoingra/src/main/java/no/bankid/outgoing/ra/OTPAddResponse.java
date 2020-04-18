@@ -14,5 +14,5 @@ public class OTPAddResponse {
         BLOCKED_BY_BANK,
         BLOCKED_IN_ODS
     }
-	public Result status;
+    public Result status;
 }
