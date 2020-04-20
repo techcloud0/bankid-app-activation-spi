@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import javax.ws.rs.DELETE;
@@ -37,10 +38,23 @@ import static no.bankid.outgoing.ra.HttpSignatureHeaders.X_DATAOWNERORGID;
                         "wanting to add BankID App as an OTP mechanism for their BankID Netcentric users.\n\n" +
                         "If an RA service implements these methods, than the activation of an BankID App will use " +
                         "them to connect the BankID App with the endUser's BankID."
-        )
+        ),
+        tags = {
+                @Tag(name = "Basic RA Requirements",
+                        description = "Adds or deletes BankID App from an endUser's BankID"),
+                @Tag(name = "Activation without Code Device",
+                        description = "Activation of BankID App with no other OTP merchanism")
+
+        },
+        servers = {
+                @Server(description = "Preprod Ra-lite",
+                        url = "https://ra-preprod.bankidnorge.no/api/enduser/bankid/netcentric/vipps/bapp")
+        }
+
 )
 
-@Path("/external/ra/")
+
+@Path("/")
 @Produces({MediaType.APPLICATION_JSON})
 
 public interface RaRequirements {
@@ -75,8 +89,6 @@ public interface RaRequirements {
     String EXAMPLE_CONTENT_LENGTH = "18";
 
 
-    @Tag(name = "Basic RA Requirements",
-            description = "Adds or deletes BankID App from an endUser's BankID")
     @Operation(summary = "Adds BankID App to an endUser"
             , description = "Adds BankID App to an endUser's BankID OTP mechanisms in a given bank"
             , tags = {"Basic RA Requirements"}
@@ -193,8 +205,6 @@ public interface RaRequirements {
 
     /////////////////////////////// TODO: reservenøkkel
 
-    @Tag(name = "Activation without Code Device",
-            description = "Activation of BankID App with no other OTP merchanism")
     @Path("healthcheck")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
