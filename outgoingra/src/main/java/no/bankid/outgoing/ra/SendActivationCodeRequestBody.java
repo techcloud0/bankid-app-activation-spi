@@ -17,6 +17,6 @@ public class SendActivationCodeRequestBody {
     public ActivationCodeType activation_code_type;
     // The code to distribute
     public String activation_code;
-    // Time when code expire
+    // Time when code expire, ms since epoch
     public String exp;
 }

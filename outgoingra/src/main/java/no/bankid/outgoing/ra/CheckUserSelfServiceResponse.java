@@ -20,7 +20,7 @@ public class CheckUserSelfServiceResponse {
         public String id;
         // Hint to user, ex. "XXX XX X42", or "que****@hotmail.com"
         public String hint;
-        // When was the contact information last verified by the user.
+        // When was the contact information last verified by the user, epoch milliseconds
         public String last_verified;
 
     }
