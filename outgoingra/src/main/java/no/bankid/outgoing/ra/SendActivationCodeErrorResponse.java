@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 @Schema(description = "The result of asking an ra to send an activation code, used in case of some error")
-public class SendActivationCodeErrorResponse {
+public class SendActivationCodeErrorResponse extends SimpleErrorResponse {
     public enum Status {
         unknown,
         inactive,
@@ -14,6 +14,4 @@ public class SendActivationCodeErrorResponse {
     }
 
     public Status status;
-
-    public String error;
 }

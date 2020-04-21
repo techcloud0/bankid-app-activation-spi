@@ -219,34 +219,37 @@ public interface RaRequirements {
                             description = "RA is not healthy")}
             , tags = {"Activation without Code Device"})
     @GET
-    Response healthCheck(@Parameter(description = DESCRIPTION_SIGNATURE,
-            example = EXAMPLE_SIGNATURE,
-            required = true)
-                         @HeaderParam(SIGNATURE) String httpSignature,
-                         @Parameter(description = DESCRIPTION_DATE,
-                                 example = EXAMPLE_DATE,
-                                 required = true)
-                         @HeaderParam(DATE) String date,
-                         @Parameter(description = DESCRIPTION_CLIENT,
-                                 example = EXAMPLE_CLIENT,
-                                 required = true)
-                         @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-                         @Parameter(description = DESCRIPTION_REQUEST_ID,
-                                 example = EXAMPLE_REQUEST_ID,
-                                 required = true)
-                         @HeaderParam(DESCRIPTION_REQUEST_ID) String requestId);
+    Response healthCheck(
+            @Parameter(description = DESCRIPTION_SIGNATURE,
+                    example = EXAMPLE_SIGNATURE,
+                    required = true)
+            @HeaderParam(SIGNATURE) String httpSignature,
+            @Parameter(description = DESCRIPTION_DATE,
+                    example = EXAMPLE_DATE,
+                    required = true)
+            @HeaderParam(DATE) String date,
+            @Parameter(description = DESCRIPTION_CLIENT,
+                    example = EXAMPLE_CLIENT,
+                    required = true)
+            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
+            @Parameter(description = DESCRIPTION_REQUEST_ID,
+                    example = EXAMPLE_REQUEST_ID,
+                    required = true)
+            @HeaderParam(DESCRIPTION_REQUEST_ID) String requestId);
 
-    @Path("check_user_selfservice")
+    @Path("selfservice/check_user")
     @Operation(summary = "Check two-channel options for endUser"
-            , description = "Check if a specific endUser is eligible for two-channel activation. "
+            , description = "<p>Endpoint to check if a specific user is eligible for two-channel activation. A user is eligible if:</p><ul><li>They have an active BankID with the current RA.</li><li>They have at least two independent verified points of contact, not violating the following disallowed combinations.<ul><li>sms + phone call</li><li>digipost + post</li><li>the same method used twice, even with different hints.</li></ul></li><li>They have not <span style=\"color: rgb(32,31,30);\">reissued the BankID (password reset)</span> in the last X days. (Subject to regulation by Bits).</li></ul><p>Which method types are supported is up to the individual RA to decide, but at least two independent (i.e. not terminating in the same point) types must be supported. i.e. sms + email is ok, phone call and sms to the same number is not. </p>"
             , tags = {"Activation without Code Device"})
     @ApiResponse(responseCode = "200", description = "If status returned is valid",
-            content = @Content(schema = @Schema(implementation = CheckUserSelfServiceResponse.class))
+            content = @Content(schema = @Schema(implementation = SelfServiceCheckUserResponse.class))
     )
     @ApiResponse(responseCode = "400", description = "In case of error")
-    @ApiResponse(responseCode = "500", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
+    )
     @GET
-    Response checkUserSelfService(
+    Response selfServiceCheckUser(
             @Parameter(description = DESCRIPTION_SIGNATURE,
                     example = EXAMPLE_SIGNATURE,
                     required = true)
@@ -270,21 +273,65 @@ public interface RaRequirements {
             @Parameter(description = DESCRIPTION_REQUEST_ID,
                     example = EXAMPLE_REQUEST_ID,
                     required = true)
-            @HeaderParam(X_CLIENT_REQUESTID) String requestId
+            @HeaderParam(X_CLIENT_REQUESTID) String requestId,
+            @RequestBody(description = "Activation code and how to distribute", required = true)
+                    SelfServiceCheckuserRequestBody selfserviceCheckuserRequestBody
     );
 
-
-    @Path("send_activation_code")
-    @Operation(summary = "Sends activation code(s) to an endUser"
-            , description = "Request distribution of an activation code to be sent to a endUser."
+    @Path("selfservice/send_verification_code")
+    @Operation(summary = "Request distribution of an a verification code to be sent to a user."
+            , description = "Endpoint to request distribution of an a verification code to be sent to a user." +
+            " Upon receiving a request on this end-point, the RA should distribute the provided code over " +
+            "sms or return an error-code."
             , tags = {"Activation without Code Device"})
-    @ApiResponse(responseCode = "200", description = "Empty body if ok, else a status",
-            content = @Content(schema = @Schema(implementation = SendActivationCodeErrorResponse.class))
-    )
+    @ApiResponse(responseCode = "200", description = "If all ok, no data is returned") // TODO: bruke 204 NO_CONTENT ???
     @ApiResponse(responseCode = "400", description = "In case of error")
-    @ApiResponse(responseCode = "500", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
+    )
     @POST
-    Response sendActivationCode(
+    Response selfServiceSendVerificationCode(
+            @Parameter(description = DESCRIPTION_SIGNATURE,
+                    example = EXAMPLE_SIGNATURE,
+                    required = true)
+            @HeaderParam(SIGNATURE) String httpSignature,
+            @Parameter(description = DESCRIPTION_DATE,
+                    example = EXAMPLE_DATE,
+                    required = true)
+            @HeaderParam(DATE) String date,
+            @Parameter(description = DESCRIPTION_CLIENT,
+                    example = EXAMPLE_CLIENT,
+                    required = true)
+            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
+            @Parameter(description = DESCRIPTION_ORIGINATOR,
+                    example = EXAMPLE_ORIGINATOR,
+                    required = true)
+            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
+            @Parameter(description = DESCRIPTION_END_USER,
+                    example = EXAMPLE_END_USER,
+                    required = true)
+            @HeaderParam(X_CUSTOMERID) String nnin,
+            @Parameter(description = DESCRIPTION_REQUEST_ID,
+                    example = EXAMPLE_REQUEST_ID,
+                    required = true)
+            @HeaderParam(X_CLIENT_REQUESTID) String requestId,
+            @RequestBody(description = "Verification code and msisdn", required = true)
+                    SendVerificationCodeRequestBody selfserviceSendVerificationCodeRequestBody
+    );
+
+    @Path("selfservice/send_code_words")
+    @Operation(summary = "Send codewords to an endUser"
+            , description = "request distribution of code words to be sent to a user." +
+            " Upon receiving a request on this end-point, the RA should distribute the provided " +
+            "code through the channel indicated, or return an error-code."
+            , tags = {"Activation without Code Device"})
+    @ApiResponse(responseCode = "200", description = "If all ok, no data is returned") // TODO: bruke 204 NO_CONTENT ???
+    @ApiResponse(responseCode = "400", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
+    )
+    @POST
+    Response selfServiceSendCodeWords(
             @Parameter(description = DESCRIPTION_SIGNATURE,
                     example = EXAMPLE_SIGNATURE,
                     required = true)
@@ -317,10 +364,58 @@ public interface RaRequirements {
                     example = EXAMPLE_REQUEST_ID,
                     required = true)
             @HeaderParam(X_CLIENT_REQUESTID) String requestId,
-            @RequestBody(description = "Activation code and how to distribute",
-                    content = @Content(schema = @Schema(type = "object", implementation = SendActivationCodeRequestBody.class)),
+            @RequestBody(description = "Activation codes and how to distribute", required = true)
+                    SendCodeWordsRequestBody sendCodeWordsRequestBody
+    );
+
+    @Path("selfservice/password_quarantine")
+    @Operation(summary = "Prohibit change of endUser password"
+            , description = "signal to the RA that self-service activation has reached the point where password " +
+            "change (automated or manual) MUST be prohibited until the provided timestamp, effective immediately."
+            , tags = {"Activation without Code Device"})
+    @ApiResponse(responseCode = "200", description = "Time when password was last reset",
+            content = @Content(schema = @Schema(implementation = PasswordQuarantineResponse.class))
+    )
+    @ApiResponse(responseCode = "400", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
+    )
+    @POST
+    Response selfServicePasswordQuarantine(
+            @Parameter(description = DESCRIPTION_SIGNATURE,
+                    example = EXAMPLE_SIGNATURE,
                     required = true)
-                    SendActivationCodeRequestBody sendActivationCodeRequestBody
+            @HeaderParam(SIGNATURE) String httpSignature,
+            @Parameter(description = DESCRIPTION_DATE,
+                    example = EXAMPLE_DATE,
+                    required = true)
+            @HeaderParam(DATE) String date,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
+                    required = true)
+            @HeaderParam(DIGEST) String digest,
+            @Parameter(description = DESCRIPTION_CONTENT_LENGTH,
+                    example = EXAMPLE_CONTENT_LENGTH,
+                    required = true)
+            @HeaderParam(CONTENT_LENGTH) String contentLength,
+            @Parameter(description = DESCRIPTION_CLIENT,
+                    example = EXAMPLE_CLIENT,
+                    required = true)
+            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
+            @Parameter(description = DESCRIPTION_ORIGINATOR,
+                    example = EXAMPLE_ORIGINATOR,
+                    required = true)
+            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
+            @Parameter(description = DESCRIPTION_END_USER,
+                    example = EXAMPLE_END_USER,
+                    required = true)
+            @HeaderParam(X_CUSTOMERID) String nnin,
+            @Parameter(description = DESCRIPTION_REQUEST_ID,
+                    example = EXAMPLE_REQUEST_ID,
+                    required = true)
+            @HeaderParam(X_CLIENT_REQUESTID) String requestId,
+            @RequestBody(description = "How long to quarantine the password", required = true)
+                    PasswordQuarantineRequestBody passwordQuarantineRequestBody
     );
 
     @Path("notify_user_of_activation")
@@ -328,11 +423,11 @@ public interface RaRequirements {
             , description = "Request to tell the endUser that his BankID App instance is activated"
             , tags = {"Activation without Code Device"}
     )
-    @ApiResponse(responseCode = "200", description = "Empty body if ok, else a status",
+    @ApiResponse(responseCode = "200", description = "If all ok, no data is returned") // TODO: bruke 204 NO_CONTENT ???
+    @ApiResponse(responseCode = "400", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
             content = @Content(schema = @Schema(implementation = NotifyUserOfActivationErrorResponse.class))
     )
-    @ApiResponse(responseCode = "400", description = "In case of error")
-    @ApiResponse(responseCode = "500", description = "In case of error")
     @POST
     Response notifyUserOfActivation(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -367,10 +462,7 @@ public interface RaRequirements {
                     example = EXAMPLE_REQUEST_ID,
                     required = true)
             @HeaderParam(X_CLIENT_REQUESTID) String requestId,
-            @RequestBody(description = "Activation code metadata",
-                    content = @Content(schema = @Schema(type = "object",
-                            implementation = NotifyUserOfActivationRequestBody.class)),
-                    required = true)
+            @RequestBody(description = "Activation code metadata", required = true)
                     NotifyUserOfActivationRequestBody notifyUserOfActivationRequestBody
     );
 }
