@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -21,7 +22,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static no.bankid.outgoing.ra.HttpSignatureHeaders.CONTENT_LENGTH;
 import static no.bankid.outgoing.ra.HttpSignatureHeaders.DATE;
 import static no.bankid.outgoing.ra.HttpSignatureHeaders.DIGEST;
 import static no.bankid.outgoing.ra.HttpSignatureHeaders.SIGNATURE;
@@ -34,16 +34,16 @@ import static no.bankid.outgoing.ra.HttpSignatureHeaders.X_DATAOWNERORGID;
         info = @Info(
                 title = "Integration of BankID App with bank's BankID RA service",
                 version = "1.2",
-                description = "Defines methods needed to be implemented by Registration Authority service in banks " +
-                        "wanting to add BankID App as an OTP mechanism for their BankID Netcentric users.\n\n" +
+                description = "Defines methods needed to be implemented by a Registration Authority service in banks " +
+                        "wanting to add BankID App as an OTP mechanism for their BankID Netcentric users.<p>" +
                         "If an RA service implements these methods, than the activation of an BankID App will use " +
-                        "them to connect the BankID App with the endUser's BankID."
+                        "them to connect the BankID App with the endUser's BankID.</p>"
         ),
         tags = {
                 @Tag(name = "Basic RA Requirements",
                         description = "Adds or deletes BankID App from an endUser's BankID"),
                 @Tag(name = "Activation without Code Device",
-                        description = "Activation of BankID App with no other OTP merchanism")
+                        description = "Activation of BankID App without no other Code Device")
 
         },
         servers = {
@@ -84,10 +84,6 @@ public interface RaRequirements {
 
     String DESCRIPTION_DIGEST = "hash of body";
     String EXAMPLE_DIGEST = "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=";
-
-    String DESCRIPTION_CONTENT_LENGTH = "Length of body";
-    String EXAMPLE_CONTENT_LENGTH = "18";
-
 
     @Operation(summary = "Adds BankID App to an endUser"
             , description = "Adds BankID App to an endUser's BankID OTP mechanisms in a given bank"
@@ -205,8 +201,6 @@ public interface RaRequirements {
 
     /////////////////////////////// TODO: reservenøkkel
 
-    @Path("healthcheck")
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(
             summary = "Health check of the RA application",
             description = "Checks that the RA is capable of handling endpoints declared here",
@@ -218,26 +212,11 @@ public interface RaRequirements {
                             responseCode = "500",
                             description = "RA is not healthy")}
             , tags = {"Activation without Code Device"})
+    @Path("healthcheck")
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
-    Response healthCheck(
-            @Parameter(description = DESCRIPTION_SIGNATURE,
-                    example = EXAMPLE_SIGNATURE,
-                    required = true)
-            @HeaderParam(SIGNATURE) String httpSignature,
-            @Parameter(description = DESCRIPTION_DATE,
-                    example = EXAMPLE_DATE,
-                    required = true)
-            @HeaderParam(DATE) String date,
-            @Parameter(description = DESCRIPTION_CLIENT,
-                    example = EXAMPLE_CLIENT,
-                    required = true)
-            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-            @Parameter(description = DESCRIPTION_REQUEST_ID,
-                    example = EXAMPLE_REQUEST_ID,
-                    required = true)
-            @HeaderParam(DESCRIPTION_REQUEST_ID) String requestId);
+    Response healthCheck();
 
-    @Path("selfservice/check_user")
     @Operation(summary = "Check two-channel options for endUser"
             , description = "<p>Endpoint to check if a specific user is eligible for two-channel activation. A user is eligible if:</p><ul><li>They have an active BankID with the current RA.</li><li>They have at least two independent verified points of contact, not violating the following disallowed combinations.<ul><li>sms + phone call</li><li>digipost + post</li><li>the same method used twice, even with different hints.</li></ul></li><li>They have not <span style=\"color: rgb(32,31,30);\">reissued the BankID (password reset)</span> in the last X days. (Subject to regulation by Bits).</li></ul><p>Which method types are supported is up to the individual RA to decide, but at least two independent (i.e. not terminating in the same point) types must be supported. i.e. sms + email is ok, phone call and sms to the same number is not. </p>"
             , tags = {"Activation without Code Device"})
@@ -248,7 +227,9 @@ public interface RaRequirements {
     @ApiResponse(responseCode = "500", description = "In case of error",
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
     )
-    @GET
+    @Path("selfservice/check_user")
+    @Consumes("application/json")
+    @POST
     Response selfServiceCheckUser(
             @Parameter(description = DESCRIPTION_SIGNATURE,
                     example = EXAMPLE_SIGNATURE,
@@ -258,6 +239,10 @@ public interface RaRequirements {
                     example = EXAMPLE_DATE,
                     required = true)
             @HeaderParam(DATE) String date,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
+                    required = true)
+            @HeaderParam(DIGEST) String digest,
             @Parameter(description = DESCRIPTION_CLIENT,
                     example = EXAMPLE_CLIENT,
                     required = true)
@@ -278,7 +263,6 @@ public interface RaRequirements {
                     SelfServiceCheckuserRequestBody selfserviceCheckuserRequestBody
     );
 
-    @Path("selfservice/send_verification_code")
     @Operation(summary = "Request distribution of an a verification code to be sent to a user."
             , description = "Endpoint to request distribution of an a verification code to be sent to a user." +
             " Upon receiving a request on this end-point, the RA should distribute the provided code over " +
@@ -289,6 +273,8 @@ public interface RaRequirements {
     @ApiResponse(responseCode = "500", description = "In case of error",
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
     )
+    @Path("selfservice/send_verification_code")
+    @Consumes("application/json")
     @POST
     Response selfServiceSendVerificationCode(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -299,6 +285,10 @@ public interface RaRequirements {
                     example = EXAMPLE_DATE,
                     required = true)
             @HeaderParam(DATE) String date,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
+                    required = true)
+            @HeaderParam(DIGEST) String digest,
             @Parameter(description = DESCRIPTION_CLIENT,
                     example = EXAMPLE_CLIENT,
                     required = true)
@@ -319,7 +309,6 @@ public interface RaRequirements {
                     SendVerificationCodeRequestBody selfserviceSendVerificationCodeRequestBody
     );
 
-    @Path("selfservice/send_code_words")
     @Operation(summary = "Send codewords to an endUser"
             , description = "request distribution of code words to be sent to a user." +
             " Upon receiving a request on this end-point, the RA should distribute the provided " +
@@ -330,6 +319,8 @@ public interface RaRequirements {
     @ApiResponse(responseCode = "500", description = "In case of error",
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
     )
+    @Path("selfservice/send_code_words")
+    @Consumes("application/json")
     @POST
     Response selfServiceSendCodeWords(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -344,10 +335,6 @@ public interface RaRequirements {
                     example = EXAMPLE_DIGEST,
                     required = true)
             @HeaderParam(DIGEST) String digest,
-            @Parameter(description = DESCRIPTION_CONTENT_LENGTH,
-                    example = EXAMPLE_CONTENT_LENGTH,
-                    required = true)
-            @HeaderParam(CONTENT_LENGTH) String contentLength,
             @Parameter(description = DESCRIPTION_CLIENT,
                     example = EXAMPLE_CLIENT,
                     required = true)
@@ -368,7 +355,6 @@ public interface RaRequirements {
                     SendCodeWordsRequestBody sendCodeWordsRequestBody
     );
 
-    @Path("selfservice/password_quarantine")
     @Operation(summary = "Prohibit change of endUser password"
             , description = "signal to the RA that self-service activation has reached the point where password " +
             "change (automated or manual) MUST be prohibited until the provided timestamp, effective immediately."
@@ -380,6 +366,8 @@ public interface RaRequirements {
     @ApiResponse(responseCode = "500", description = "In case of error",
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
     )
+    @Path("selfservice/password_quarantine")
+    @Consumes("application/json")
     @POST
     Response selfServicePasswordQuarantine(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -394,10 +382,6 @@ public interface RaRequirements {
                     example = EXAMPLE_DIGEST,
                     required = true)
             @HeaderParam(DIGEST) String digest,
-            @Parameter(description = DESCRIPTION_CONTENT_LENGTH,
-                    example = EXAMPLE_CONTENT_LENGTH,
-                    required = true)
-            @HeaderParam(CONTENT_LENGTH) String contentLength,
             @Parameter(description = DESCRIPTION_CLIENT,
                     example = EXAMPLE_CLIENT,
                     required = true)
@@ -418,7 +402,6 @@ public interface RaRequirements {
                     PasswordQuarantineRequestBody passwordQuarantineRequestBody
     );
 
-    @Path("notify_user_of_activation")
     @Operation(summary = "Tell endUser that BankID App is activated"
             , description = "Request to tell the endUser that his BankID App instance is activated"
             , tags = {"Activation without Code Device"}
@@ -428,6 +411,8 @@ public interface RaRequirements {
     @ApiResponse(responseCode = "500", description = "In case of error",
             content = @Content(schema = @Schema(implementation = NotifyUserOfActivationErrorResponse.class))
     )
+    @Path("notify_user_of_activation")
+    @Consumes("application/json")
     @POST
     Response notifyUserOfActivation(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -442,10 +427,6 @@ public interface RaRequirements {
                     example = EXAMPLE_DIGEST,
                     required = true)
             @HeaderParam(DIGEST) String digest,
-            @Parameter(description = DESCRIPTION_CONTENT_LENGTH,
-                    example = EXAMPLE_CONTENT_LENGTH,
-                    required = true)
-            @HeaderParam(CONTENT_LENGTH) String contentLength,
             @Parameter(description = DESCRIPTION_CLIENT,
                     example = EXAMPLE_CLIENT,
                     required = true)

@@ -5,9 +5,7 @@ import javax.ws.rs.core.HttpHeaders;
 public interface HttpSignatureHeaders {
     String SIGNATURE = "Signature";
     String DATE = HttpHeaders.DATE;
-
     String DIGEST = "digest";
-    String CONTENT_LENGTH = HttpHeaders.CONTENT_LENGTH;
 
     String X_CLIENT_CLIENTNAME = "X-CLIENT-CLIENTNAME";
     String X_CLIENT_REQUESTID = "X-CLIENT-REQUESTID";
