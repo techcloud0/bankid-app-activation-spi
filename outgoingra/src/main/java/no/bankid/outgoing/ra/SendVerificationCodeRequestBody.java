@@ -5,14 +5,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 
 @Schema(description = "Request body content for asking an RA to send verification code to enduser")
-public class SendVerificationCodeRequestBody {
+public class SendVerificationCodeRequestBody extends AuthenticationBody {
 
-    //The id of this activation attempt, will be the same for both codes, an uuid actually
+    @Schema(description = "The id of this activation attempt, used for for logging, will be the same for both codes")
     public UUID activation_id;
     public Msisdn msisdn;
     public ActivationCodeLocale locale;
-    // four digit code
+    @Schema(description = "Four digit code")
     public String verification_code;
-    // Time when code expire, ms since epoch
+    @Schema(description = "Time when code expire, ms since epoch, UTC")
     public long exp;
 }

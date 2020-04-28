@@ -6,15 +6,13 @@ import java.util.UUID;
 
 @Schema(description = "Request body content for asking an RA to send code words to an endUser")
 public class SendCodeWordsRequestBody {
-
-    //The id of this activation attempt, will be the same for both codes, an uuid actually
+    @Schema(description = "The id of this activation attempt, used for for logging, will be the same for both codes")
     public UUID activation_id;
-    // One of the method identifiers returned from selfsercive/check_user call
+    @Schema(description = "One of the method identifiers returned from selfservice/check_user call")
     public String distribution_method;
-    // Locale of initiating app, either "no" for Norwegian and Norwegian dialects, otherwise "en".
     public ActivationCodeLocale locale;
-    // The twe code words to distribute
+    @Schema(description = "The two code words to distribute")
     public String code_words;
-    // Time when code expire, ms since epoch
+    @Schema(description = "Time when code expire, ms since epoch, UTC")
     public long exp;
 }

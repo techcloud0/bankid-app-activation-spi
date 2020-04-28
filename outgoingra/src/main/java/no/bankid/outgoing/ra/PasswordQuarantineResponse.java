@@ -6,6 +6,6 @@ import java.util.UUID;
 
 @Schema(description = "Resporse when quarantining an endUser password")
 public class PasswordQuarantineResponse {
-    // Timestamp when user's password was last reset, ms since epoch.
+    @Schema(description = "Time when user's password was last reset, ms since epoch, UTC")
     public long pw_reset_timestamp;
 }

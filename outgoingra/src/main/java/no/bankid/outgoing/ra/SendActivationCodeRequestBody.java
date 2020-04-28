@@ -5,20 +5,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 
 @Schema(description = "Request body content for asking an RA to send an activation code to an endUser")
-public class SendActivationCodeRequestBody {
+public class SendActivationCodeRequestBody extends AuthenticationBody {
 
     public enum ActivationCodeType { digits, words }
 
-    //The id of this activation attempt, will be the same for both codes, an uuid actually
+    @Schema(description = "The id of this activation attempt, used for for logging, will be the same for both codes")
     public UUID activation_id;
-    // One of the method identifiers returned from check_user_selfservice call
+    @Schema(description = "One of the method identifiers returned from check_user_selfservice call")
     public String distribution_method;
-    // Locale of initiating app, either "no" for Norwegian and Norwegian dialects, otherwise "en".
     public ActivationCodeLocale locale;
-    // Whether the activation code is a number or two code words
+    @Schema(description = "Whether the activation code is a number or two code words")
     public ActivationCodeType activation_code_type;
-    // The code to distribute
+    @Schema(description = "The code to distribute")
     public String activation_code;
-    // Time when code expire, ms since epoch
-    public String exp;
+    @Schema(description = "Time when code expire, ms since epoch, UTC")
+    public long exp;
 }

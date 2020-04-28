@@ -5,10 +5,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 
 @Schema(description = "Request body content for quarantining the user password")
-public class PasswordQuarantineRequestBody {
+public class PasswordQuarantineRequestBody extends AuthenticationBody {
 
-    //The id of this activation attempt, will be the same for both codes, an uuid actually
+    @Schema(description = "The id of this activation attempt, used for for logging")
     public UUID activation_id;
-    // Time when quarantine expires, ms since epoch
+    @Schema(description = "Time when quarantine expire, ms since epoch, UTC")
     public long quarantine_until;
 }

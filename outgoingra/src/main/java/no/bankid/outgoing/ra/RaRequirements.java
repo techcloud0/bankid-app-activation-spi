@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -25,10 +24,6 @@ import javax.ws.rs.core.Response;
 import static no.bankid.outgoing.ra.HttpSignatureHeaders.DATE;
 import static no.bankid.outgoing.ra.HttpSignatureHeaders.DIGEST;
 import static no.bankid.outgoing.ra.HttpSignatureHeaders.SIGNATURE;
-import static no.bankid.outgoing.ra.HttpSignatureHeaders.X_CLIENT_CLIENTNAME;
-import static no.bankid.outgoing.ra.HttpSignatureHeaders.X_CLIENT_REQUESTID;
-import static no.bankid.outgoing.ra.HttpSignatureHeaders.X_CUSTOMERID;
-import static no.bankid.outgoing.ra.HttpSignatureHeaders.X_DATAOWNERORGID;
 
 @OpenAPIDefinition(
         info = @Info(
@@ -55,8 +50,8 @@ import static no.bankid.outgoing.ra.HttpSignatureHeaders.X_DATAOWNERORGID;
 
 
 @Path("/")
-@Produces({MediaType.APPLICATION_JSON})
-
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public interface RaRequirements {
 
     String DESCRIPTION_SIGNATURE = "The Signature element, as described " +
@@ -70,19 +65,8 @@ public interface RaRequirements {
             "<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>";
     String EXAMPLE_DATE = "Mon, 16 Sep 2019 12:12:21 GMT";
 
-    String DESCRIPTION_CLIENT = "Client calling this method, constant value";
-    String EXAMPLE_CLIENT = "vipps-bapp-client";
-
-    String DESCRIPTION_ORIGINATOR = "Originator/bank-number for endUser's bankID, valid BankID ODS number";
-    String EXAMPLE_ORIGINATOR = "3625";
-
-    String DESCRIPTION_END_USER = "EndUser's Norwegian national identification number, string of 11 digits";
-    String EXAMPLE_END_USER = "11111111016";
-
-    String DESCRIPTION_REQUEST_ID = "A unique identifier pr. request for logcorrelation";
-    String EXAMPLE_REQUEST_ID = "d0ef2e2f-2e07-45b1-b2ff-e39fb894adc8";
-
-    String DESCRIPTION_DIGEST = "hash of body";
+    String DESCRIPTION_DIGEST = "hash of body, SHA-256 used" +
+            "<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") is not thread safe in Java</p>";
     String EXAMPLE_DIGEST = "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=";
 
     @Operation(summary = "Adds BankID App to an endUser"
@@ -94,7 +78,10 @@ public interface RaRequirements {
             content = @Content(schema = @Schema(implementation = OTPAddResponse.class))
     )
     @ApiResponse(responseCode = "400", description = "In case of error")
-    @ApiResponse(responseCode = "500", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
+    )
+    @Path("add")
     @PUT
     Response addBappOtp(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -105,22 +92,11 @@ public interface RaRequirements {
                     example = EXAMPLE_DATE,
                     required = true)
             @HeaderParam(DATE) String date,
-            @Parameter(description = DESCRIPTION_CLIENT,
-                    example = EXAMPLE_CLIENT,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
                     required = true)
-            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-            @Parameter(description = DESCRIPTION_ORIGINATOR,
-                    example = EXAMPLE_ORIGINATOR,
-                    required = true)
-            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
-            @Parameter(description = DESCRIPTION_END_USER,
-                    example = EXAMPLE_END_USER,
-                    required = true)
-            @HeaderParam(X_CUSTOMERID) String nnin,
-            @Parameter(description = DESCRIPTION_REQUEST_ID,
-                    example = EXAMPLE_REQUEST_ID,
-                    required = true)
-            @HeaderParam(X_CLIENT_REQUESTID) String requestId
+            @HeaderParam(DIGEST) String digest,
+            AuthenticationBody authenticationBody
     );
 
     @Operation(summary = "Gets the BankID App OTP status for an endUser"
@@ -132,8 +108,11 @@ public interface RaRequirements {
             content = @Content(schema = @Schema(implementation = OTPStatusResponse.class))
     )
     @ApiResponse(responseCode = "400", description = "In case of error")
-    @ApiResponse(responseCode = "500", description = "In case of error")
-    @GET
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
+    )
+    @Path("status")
+    @PUT
     Response getBappOtpStatus(
             @Parameter(description = DESCRIPTION_SIGNATURE,
                     example = EXAMPLE_SIGNATURE,
@@ -143,22 +122,11 @@ public interface RaRequirements {
                     example = EXAMPLE_DATE,
                     required = true)
             @HeaderParam(DATE) String date,
-            @Parameter(description = DESCRIPTION_CLIENT,
-                    example = EXAMPLE_CLIENT,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
                     required = true)
-            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-            @Parameter(description = DESCRIPTION_ORIGINATOR,
-                    example = EXAMPLE_ORIGINATOR,
-                    required = true)
-            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
-            @Parameter(description = DESCRIPTION_END_USER,
-                    example = EXAMPLE_END_USER,
-                    required = true)
-            @HeaderParam(X_CUSTOMERID) String nnin,
-            @Parameter(description = DESCRIPTION_REQUEST_ID,
-                    example = EXAMPLE_REQUEST_ID,
-                    required = true)
-            @HeaderParam(X_CLIENT_REQUESTID) String requestId
+            @HeaderParam(DIGEST) String digest,
+            AuthenticationBody authenticationBody
     );
 
     @Operation(summary = "Removes BankID App from an endUser"
@@ -170,8 +138,11 @@ public interface RaRequirements {
             content = @Content(schema = @Schema(implementation = OTPDeleteResponse.class))
     )
     @ApiResponse(responseCode = "400", description = "In case of error")
-    @ApiResponse(responseCode = "500", description = "In case of error")
-    @DELETE
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
+    )
+    @PUT
+    @Path("remove")
     Response removeBappOtp(
             @Parameter(description = DESCRIPTION_SIGNATURE,
                     example = EXAMPLE_SIGNATURE,
@@ -181,22 +152,11 @@ public interface RaRequirements {
                     example = EXAMPLE_DATE,
                     required = true)
             @HeaderParam(DATE) String date,
-            @Parameter(description = DESCRIPTION_CLIENT,
-                    example = EXAMPLE_CLIENT,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
                     required = true)
-            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-            @Parameter(description = DESCRIPTION_ORIGINATOR,
-                    example = EXAMPLE_ORIGINATOR,
-                    required = true)
-            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
-            @Parameter(description = DESCRIPTION_END_USER,
-                    example = EXAMPLE_END_USER,
-                    required = true)
-            @HeaderParam(X_CUSTOMERID) String nnin,
-            @Parameter(description = DESCRIPTION_REQUEST_ID,
-                    example = EXAMPLE_REQUEST_ID,
-                    required = true)
-            @HeaderParam(X_CLIENT_REQUESTID) String requestId
+            @HeaderParam(DIGEST) String digest,
+            AuthenticationBody authenticationBody
     );
 
     /////////////////////////////// TODO: reservenøkkel
@@ -228,7 +188,6 @@ public interface RaRequirements {
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
     )
     @Path("selfservice/check_user")
-    @Consumes("application/json")
     @POST
     Response selfServiceCheckUser(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -243,22 +202,6 @@ public interface RaRequirements {
                     example = EXAMPLE_DIGEST,
                     required = true)
             @HeaderParam(DIGEST) String digest,
-            @Parameter(description = DESCRIPTION_CLIENT,
-                    example = EXAMPLE_CLIENT,
-                    required = true)
-            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-            @Parameter(description = DESCRIPTION_ORIGINATOR,
-                    example = EXAMPLE_ORIGINATOR,
-                    required = true)
-            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
-            @Parameter(description = DESCRIPTION_END_USER,
-                    example = EXAMPLE_END_USER,
-                    required = true)
-            @HeaderParam(X_CUSTOMERID) String nnin,
-            @Parameter(description = DESCRIPTION_REQUEST_ID,
-                    example = EXAMPLE_REQUEST_ID,
-                    required = true)
-            @HeaderParam(X_CLIENT_REQUESTID) String requestId,
             @RequestBody(description = "Activation code and how to distribute", required = true)
                     SelfServiceCheckuserRequestBody selfserviceCheckuserRequestBody
     );
@@ -274,7 +217,6 @@ public interface RaRequirements {
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
     )
     @Path("selfservice/send_verification_code")
-    @Consumes("application/json")
     @POST
     Response selfServiceSendVerificationCode(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -289,22 +231,6 @@ public interface RaRequirements {
                     example = EXAMPLE_DIGEST,
                     required = true)
             @HeaderParam(DIGEST) String digest,
-            @Parameter(description = DESCRIPTION_CLIENT,
-                    example = EXAMPLE_CLIENT,
-                    required = true)
-            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-            @Parameter(description = DESCRIPTION_ORIGINATOR,
-                    example = EXAMPLE_ORIGINATOR,
-                    required = true)
-            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
-            @Parameter(description = DESCRIPTION_END_USER,
-                    example = EXAMPLE_END_USER,
-                    required = true)
-            @HeaderParam(X_CUSTOMERID) String nnin,
-            @Parameter(description = DESCRIPTION_REQUEST_ID,
-                    example = EXAMPLE_REQUEST_ID,
-                    required = true)
-            @HeaderParam(X_CLIENT_REQUESTID) String requestId,
             @RequestBody(description = "Verification code and msisdn", required = true)
                     SendVerificationCodeRequestBody selfserviceSendVerificationCodeRequestBody
     );
@@ -320,7 +246,6 @@ public interface RaRequirements {
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
     )
     @Path("selfservice/send_code_words")
-    @Consumes("application/json")
     @POST
     Response selfServiceSendCodeWords(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -335,22 +260,6 @@ public interface RaRequirements {
                     example = EXAMPLE_DIGEST,
                     required = true)
             @HeaderParam(DIGEST) String digest,
-            @Parameter(description = DESCRIPTION_CLIENT,
-                    example = EXAMPLE_CLIENT,
-                    required = true)
-            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-            @Parameter(description = DESCRIPTION_ORIGINATOR,
-                    example = EXAMPLE_ORIGINATOR,
-                    required = true)
-            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
-            @Parameter(description = DESCRIPTION_END_USER,
-                    example = EXAMPLE_END_USER,
-                    required = true)
-            @HeaderParam(X_CUSTOMERID) String nnin,
-            @Parameter(description = DESCRIPTION_REQUEST_ID,
-                    example = EXAMPLE_REQUEST_ID,
-                    required = true)
-            @HeaderParam(X_CLIENT_REQUESTID) String requestId,
             @RequestBody(description = "Activation codes and how to distribute", required = true)
                     SendCodeWordsRequestBody sendCodeWordsRequestBody
     );
@@ -367,7 +276,6 @@ public interface RaRequirements {
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
     )
     @Path("selfservice/password_quarantine")
-    @Consumes("application/json")
     @POST
     Response selfServicePasswordQuarantine(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -382,22 +290,6 @@ public interface RaRequirements {
                     example = EXAMPLE_DIGEST,
                     required = true)
             @HeaderParam(DIGEST) String digest,
-            @Parameter(description = DESCRIPTION_CLIENT,
-                    example = EXAMPLE_CLIENT,
-                    required = true)
-            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-            @Parameter(description = DESCRIPTION_ORIGINATOR,
-                    example = EXAMPLE_ORIGINATOR,
-                    required = true)
-            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
-            @Parameter(description = DESCRIPTION_END_USER,
-                    example = EXAMPLE_END_USER,
-                    required = true)
-            @HeaderParam(X_CUSTOMERID) String nnin,
-            @Parameter(description = DESCRIPTION_REQUEST_ID,
-                    example = EXAMPLE_REQUEST_ID,
-                    required = true)
-            @HeaderParam(X_CLIENT_REQUESTID) String requestId,
             @RequestBody(description = "How long to quarantine the password", required = true)
                     PasswordQuarantineRequestBody passwordQuarantineRequestBody
     );
@@ -412,7 +304,6 @@ public interface RaRequirements {
             content = @Content(schema = @Schema(implementation = NotifyUserOfActivationErrorResponse.class))
     )
     @Path("notify_user_of_activation")
-    @Consumes("application/json")
     @POST
     Response notifyUserOfActivation(
             @Parameter(description = DESCRIPTION_SIGNATURE,
@@ -427,22 +318,6 @@ public interface RaRequirements {
                     example = EXAMPLE_DIGEST,
                     required = true)
             @HeaderParam(DIGEST) String digest,
-            @Parameter(description = DESCRIPTION_CLIENT,
-                    example = EXAMPLE_CLIENT,
-                    required = true)
-            @HeaderParam(X_CLIENT_CLIENTNAME) String clientName,
-            @Parameter(description = DESCRIPTION_ORIGINATOR,
-                    example = EXAMPLE_ORIGINATOR,
-                    required = true)
-            @HeaderParam(X_DATAOWNERORGID) String odsBankNo,
-            @Parameter(description = DESCRIPTION_END_USER,
-                    example = EXAMPLE_END_USER,
-                    required = true)
-            @HeaderParam(X_CUSTOMERID) String nnin,
-            @Parameter(description = DESCRIPTION_REQUEST_ID,
-                    example = EXAMPLE_REQUEST_ID,
-                    required = true)
-            @HeaderParam(X_CLIENT_REQUESTID) String requestId,
             @RequestBody(description = "Activation code metadata", required = true)
                     NotifyUserOfActivationRequestBody notifyUserOfActivationRequestBody
     );

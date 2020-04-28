@@ -18,7 +18,7 @@ public class SelfServiceCheckUserResponse {
         public long last_verified;
 
     }
-    // Timestamp when the user's password was last reset. (UTC), epoch milliseconds ?
+    @Schema(description = "Time when the user's password was last reset, ms since epoch, UTC")
     public long pw_reset_timestamp;
     // True if the given phone number matches the what is registered for the given user.
     public boolean correct_msisdn;

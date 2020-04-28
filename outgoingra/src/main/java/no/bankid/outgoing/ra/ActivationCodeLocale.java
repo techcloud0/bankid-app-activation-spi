@@ -1,3 +1,9 @@
 package no.bankid.outgoing.ra;
 
-public enum ActivationCodeLocale { en, no }
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Locale of initiating app, either \"no\" for Norwegian and Norwegian dialects, otherwise \"en\"" +
+        "<h5>(the 'no' value is shown as 'false', openapi nuisance</h5>")
+public enum ActivationCodeLocale {
+    no, en
+}
