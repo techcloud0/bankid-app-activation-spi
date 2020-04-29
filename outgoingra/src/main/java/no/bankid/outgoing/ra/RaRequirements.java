@@ -57,16 +57,15 @@ public interface RaRequirements {
     String DESCRIPTION_SIGNATURE = "The Signature element, as described " +
             "in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.";
     String EXAMPLE_SIGNATURE = "keyId=\"fa998090\",algorithm=\"rsa-sha256\"," +
-            "headers=\"(request-target) date x-client-clientname x-dataownerorgid " +
-            "x-client-requestid x-customerid\",signature=\"o7zK892....\"";
+            "headers=\"(request-target) date digest\",signature=\"o7zK892....\"";
 
-    String DESCRIPTION_DATE = "The date element, the preferred format specified in " +
+    String DESCRIPTION_DATE = "The date element, required format is the format named 'preferred' specified in " +
             "<a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>." +
             "<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>";
     String EXAMPLE_DATE = "Mon, 16 Sep 2019 12:12:21 GMT";
 
-    String DESCRIPTION_DIGEST = "hash of body, SHA-256 used" +
-            "<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") is not thread safe in Java</p>";
+    String DESCRIPTION_DIGEST = "SHA-256 hash of body" +
+            "<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>";
     String EXAMPLE_DIGEST = "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=";
 
     @Operation(summary = "Adds BankID App to an endUser"
@@ -159,8 +158,6 @@ public interface RaRequirements {
             AuthenticationBody authenticationBody
     );
 
-    /////////////////////////////// TODO: reservenøkkel
-
     @Operation(
             summary = "Health check of the RA application",
             description = "Checks that the RA is capable of handling endpoints declared here",
@@ -178,7 +175,10 @@ public interface RaRequirements {
     Response healthCheck();
 
     @Operation(summary = "Check two-channel options for endUser"
-            , description = "<p>Endpoint to check if a specific user is eligible for two-channel activation. A user is eligible if:</p><ul><li>They have an active BankID with the current RA.</li><li>They have at least two independent verified points of contact, not violating the following disallowed combinations.<ul><li>sms + phone call</li><li>digipost + post</li><li>the same method used twice, even with different hints.</li></ul></li><li>They have not <span style=\"color: rgb(32,31,30);\">reissued the BankID (password reset)</span> in the last X days. (Subject to regulation by Bits).</li></ul><p>Which method types are supported is up to the individual RA to decide, but at least two independent (i.e. not terminating in the same point) types must be supported. i.e. sms + email is ok, phone call and sms to the same number is not. </p>"
+            , description =
+            "<p>Endpoint to check if a specific user is eligible from single originator for self-service activation.</p>" +
+                    "<p>The RA should check if the provided phone number is registered for the user, " +
+                    "but return the other information regardless."
             , tags = {"Activation without Code Device"})
     @ApiResponse(responseCode = "200", description = "If status returned is valid",
             content = @Content(schema = @Schema(implementation = SelfServiceCheckUserResponse.class))
@@ -206,12 +206,13 @@ public interface RaRequirements {
                     SelfServiceCheckuserRequestBody selfserviceCheckuserRequestBody
     );
 
-    @Operation(summary = "Request distribution of an a verification code to be sent to a user."
-            , description = "Endpoint to request distribution of an a verification code to be sent to a user." +
-            " Upon receiving a request on this end-point, the RA should distribute the provided code over " +
-            "sms or return an error-code."
+    @Operation(summary = "Request distribution of a verification code to be sent to an endUser."
+            , description = "<p>Endpoint to request distribution of an a verification code to be sent to an endUser. " +
+            "Upon receiving a request on this end-point, the RA should distribute the provided code over " +
+            "sms or return an error-code.</p>" +
+            "<p>The RA should reject requests if they do not recognize the combination of nnin + msisdn</p>"
             , tags = {"Activation without Code Device"})
-    @ApiResponse(responseCode = "200", description = "If all ok, no data is returned") // TODO: bruke 204 NO_CONTENT ???
+    @ApiResponse(responseCode = "200", description = "If all ok, no data is returned")
     @ApiResponse(responseCode = "400", description = "In case of error")
     @ApiResponse(responseCode = "500", description = "In case of error",
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
@@ -240,7 +241,7 @@ public interface RaRequirements {
             " Upon receiving a request on this end-point, the RA should distribute the provided " +
             "code through the channel indicated, or return an error-code."
             , tags = {"Activation without Code Device"})
-    @ApiResponse(responseCode = "200", description = "If all ok, no data is returned") // TODO: bruke 204 NO_CONTENT ???
+    @ApiResponse(responseCode = "200", description = "If all ok, no data is returned")
     @ApiResponse(responseCode = "400", description = "In case of error")
     @ApiResponse(responseCode = "500", description = "In case of error",
             content = @Content(schema = @Schema(implementation = SimpleErrorResponse.class))
@@ -295,10 +296,10 @@ public interface RaRequirements {
     );
 
     @Operation(summary = "Tell endUser that BankID App is activated"
-            , description = "Request to tell the endUser that his BankID App instance is activated"
+            , description = "Request notification of the endUser that his BankID App instance is activated"
             , tags = {"Activation without Code Device"}
     )
-    @ApiResponse(responseCode = "200", description = "If all ok, no data is returned") // TODO: bruke 204 NO_CONTENT ???
+    @ApiResponse(responseCode = "200", description = "If all ok, no data is returned")
     @ApiResponse(responseCode = "400", description = "In case of error")
     @ApiResponse(responseCode = "500", description = "In case of error",
             content = @Content(schema = @Schema(implementation = NotifyUserOfActivationErrorResponse.class))

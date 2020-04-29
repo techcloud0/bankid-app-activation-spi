@@ -8,7 +8,7 @@ public class OTPAddResponse {
     @Schema(description = "Status value for add operation" +
             "<ul>" +
             "<li>ENABLED - BAPP is enabled for the endUser</li>" +
-            "<li>NOT_ENABLED - BAPP is not enabled, but could be</li>" +
+            "<li>NOT_ENABLED - Failed to enable BAPP for the customer</li>" +
             "<li>ALREADY_ENABLED - BAPP was already enabled</li>" +
             "<li>NOT_AVAILABLE - BAPP is not available for the bank</li>" +
             "<li>BANK_ID_NOT_AVAILABLE - endUser doesn't have active BankID</li>" +

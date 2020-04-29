@@ -6,22 +6,32 @@ import java.util.List;
 
 @Schema(description = "The result of querying RA about endUser distribution methods")
 public class SelfServiceCheckUserResponse {
-
+    @Schema(description = "Declaration for Methods for distribution and ")
     public static class DistributionMethod {
-        // "email/digipost/post/xxx...",        # Type of distribution method
-        public String type;
-        // An id for this distribution method, must be unique within this response.
-        public String id;
-        // Hint to user, ex. "XXX XX X42", or "que****@hotmail.com"
-        public String hint;
-        // When was the contact information last verified by the user, epoch milliseconds
-        public long last_verified;
+        @Schema(description = "Type of distribution" +
+                "<ul>" +
+                "<li> - email:  1-3 unmasked characters + \"(...)\" @ domain.topdomain, eg. dei(...)@gmail.com </li>" +
+                "<li> - post: Hint must be \"Folkeregistrert adresse\". Details on the address must not be exposed. </li>" +
+                "</ul>", example = "email"
+        )
+        public enum DistributeBy {email, postal}
 
+        public DistributeBy type;
+        @Schema(description = "An id for this distribution method, must be unique within this response")
+        public String id;
+        @Schema(description = "Hint to user, ex. \"que****@hotmail.com\" or \"Folkeregistrert adresse\"",
+                example = "Folkeregistrert adresse")
+        public String hint;
+        @Schema(description = "When was this contact information last verified by the user, ms since epoch, UTC")
+        public long last_verified;
+        @Schema(description = "When was this contact information last modified by the user, ms since epoch, UTC")
+        public long last_modified;
     }
+
     @Schema(description = "Time when the user's password was last reset, ms since epoch, UTC")
     public long pw_reset_timestamp;
-    // True if the given phone number matches the what is registered for the given user.
+    @Schema(description = "True if the given phone number matches the what is registered for the given user")
     public boolean correct_msisdn;
-    // List of distribution methods
+    @Schema(description = "List of distribution methods")
     public List<DistributionMethod> distribution_methods;
 }

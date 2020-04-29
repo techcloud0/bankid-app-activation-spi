@@ -10,7 +10,7 @@ public class SendCodeWordsRequestBody {
     public UUID activation_id;
     @Schema(description = "One of the method identifiers returned from selfservice/check_user call")
     public String distribution_method;
-    public ActivationCodeLocale locale;
+    public AppClientLocale locale;
     @Schema(description = "The two code words to distribute")
     public String code_words;
     @Schema(description = "Time when code expire, ms since epoch, UTC")

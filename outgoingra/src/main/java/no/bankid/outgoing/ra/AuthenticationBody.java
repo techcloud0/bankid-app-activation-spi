@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AuthenticationBody {
     @Schema(description = "Name of client sending the request",
-            example = "vipps-bapp-cliont")
+            example = "vipps-bapp-client")
     public String client_name;
     @Schema(description = "A unique identifier pr. request, used for log correlation",
             example = "e6dccaf0-c72f-48d9-9dc8-665e51e08e47")
