@@ -11,16 +11,16 @@ public class SelfServiceCheckUserResponse {
         @Schema(description = "Type of distribution" +
                 "<ul>" +
                 "<li> - email:  1-3 unmasked characters + \"(...)\" @ domain.topdomain, eg. dei(...)@gmail.com </li>" +
-                "<li> - post: Hint must be \"Folkeregistrert adresse\". Details on the address must not be exposed. </li>" +
+                "<li> - official_address: No hint, details on the address must not be exposed. </li>" +
                 "</ul>", example = "email"
         )
-        public enum DistributeBy {email, postal}
+        public enum DistributeBy {email, official_address}
 
         public DistributeBy type;
         @Schema(description = "An id for this distribution method, must be unique within this response")
         public String id;
-        @Schema(description = "Hint to user, ex. \"que****@hotmail.com\" or \"Folkeregistrert adresse\"",
-                example = "Folkeregistrert adresse")
+        @Schema(description = "Hint to user, ex. \"que****@hotmail.com\" or empty string on official_address",
+                example = "")
         public String hint;
         @Schema(description = "When was this contact information last verified by the user, ms since epoch, UTC")
         public long last_verified;
