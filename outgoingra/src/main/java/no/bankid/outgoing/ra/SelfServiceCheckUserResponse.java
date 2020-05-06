@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(description = "The result of querying RA about endUser distribution methods")
+@Schema(description = "The result of querying RA about end user distribution methods")
 public class SelfServiceCheckUserResponse {
     @Schema(description = "Declaration for Methods for distribution and ")
     public static class DistributionMethod {
