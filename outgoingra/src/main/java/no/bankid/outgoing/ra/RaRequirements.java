@@ -33,7 +33,7 @@ import static no.bankid.outgoing.ra.HttpSignatureHeaders.SIGNATURE;
                         "support activation of BankID App as a HA2 element for an end user's Netcentric BankID."
         ),
         tags = {
-                @Tag(name = "Basic RA Requirements",
+                @Tag(name = "OTP administration",
                         description = "Adds or deletes BankID App from an end user's BankID"),
                 @Tag(name = "Activation without Code Device",
                         description = "Activation of BankID App without a Code Device")
@@ -68,11 +68,11 @@ public interface RaRequirements {
 
     @Operation(summary = "Adds BankID App to an end user"
             , description = "Adds BankID App to an end user's BankID OTP mechanisms in a given bank"
-            , tags = {"Basic RA Requirements"}
+            , tags = {"OTP administration"}
     )
 
     @ApiResponse(responseCode = "200", description = "If status returned is valid",
-            content = @Content(schema = @Schema(implementation = OTPAddResponse.class))
+            content = @Content(schema = @Schema(implementation = AddBappResponse.class))
     )
     @ApiResponse(responseCode = "400", description = "In case of error")
     @ApiResponse(responseCode = "500", description = "In case of error",
@@ -99,10 +99,10 @@ public interface RaRequirements {
     @Operation(summary = "Gets the BankID App OTP status for an end user"
             , description = "Checks whether an end user has BankID App enabled as an OTP mechanism " +
             "for at least one of his BankIDs in a given bank"
-            , tags = {"Basic RA Requirements"}
+            , tags = {"OTP administration"}
     )
     @ApiResponse(responseCode = "200", description = "If status returned is valid",
-            content = @Content(schema = @Schema(implementation = OTPStatusResponse.class))
+            content = @Content(schema = @Schema(implementation = StatusBappResponse.class))
     )
     @ApiResponse(responseCode = "400", description = "In case of error")
     @ApiResponse(responseCode = "500", description = "In case of error",
@@ -129,10 +129,10 @@ public interface RaRequirements {
     @Operation(summary = "Removes BankID App from an end user"
             , description = "Removes BankID App as an end user's OTP mechanism for at least one of " +
             "his BankIDs in a given bank"
-            , tags = {"Basic RA Requirements"}
+            , tags = {"OTP administration"}
     )
     @ApiResponse(responseCode = "200", description = "If status returned is valid",
-            content = @Content(schema = @Schema(implementation = OTPDeleteResponse.class))
+            content = @Content(schema = @Schema(implementation = DeleteBappResponse.class))
     )
     @ApiResponse(responseCode = "400", description = "In case of error")
     @ApiResponse(responseCode = "500", description = "In case of error",
