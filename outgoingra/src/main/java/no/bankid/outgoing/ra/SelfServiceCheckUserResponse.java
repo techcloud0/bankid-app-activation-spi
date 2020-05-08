@@ -14,7 +14,9 @@ public class SelfServiceCheckUserResponse {
                 "<li> - official_address: No hint, details on the address must not be exposed. </li>" +
                 "</ul>", example = "email"
         )
-        public enum DistributeBy {email, official_address}
+        public enum DistributeBy {
+            email, official_address
+        }
 
         public DistributeBy type;
         @Schema(description = "An id for this distribution method, must be unique within this response")
