@@ -293,7 +293,7 @@ public interface RaRequirements {
     );
 
     @Operation(summary = "Tell end user that BankID App is activated"
-            , description = "Request notification of the endUser that his BankID App instance is activated"
+            , description = "Request notification of the end user that his BankID App instance is activated"
             , tags = {"OTP administration"}
     )
     @ApiResponse(responseCode = "200", description = "If all ok, no data is returned")
