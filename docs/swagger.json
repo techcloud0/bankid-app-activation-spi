@@ -61,7 +61,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/SelfServiceCheckuserRequestBody"
+                "$ref" : "#/components/schemas/SelfServiceCheckUserRequestBody"
               }
             }
           },
@@ -361,18 +361,72 @@
         }
       }
     },
-    "/healthcheck" : {
-      "get" : {
-        "tags" : [ "Service availability" ],
-        "summary" : "Health check of the RA application",
-        "description" : "Checks that the RA is capable of handling endpoints declared here",
-        "operationId" : "healthCheck",
+    "/remove" : {
+      "post" : {
+        "tags" : [ "OTP administration" ],
+        "summary" : "Removes BankID App from an end user",
+        "description" : "Removes BankID App as an end user's OTP mechanism for at least one of his BankIDs in a given bank",
+        "operationId" : "removeBappOtp",
+        "parameters" : [ {
+          "name" : "Signature",
+          "in" : "header",
+          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
+        }, {
+          "name" : "Date",
+          "in" : "header",
+          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
+        }, {
+          "name" : "Digest",
+          "in" : "header",
+          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AuthenticationBody"
+              }
+            }
+          }
+        },
         "responses" : {
           "200" : {
-            "description" : "RA is healthy"
+            "description" : "If status returned is valid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteBappResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "In case of error"
           },
           "500" : {
-            "description" : "RA is not healthy"
+            "description" : "In case of error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SimpleErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -447,6 +501,22 @@
         }
       }
     },
+    "/healthcheck" : {
+      "get" : {
+        "tags" : [ "Service availability" ],
+        "summary" : "Health check of the RA application",
+        "description" : "Checks that the RA is capable of handling endpoints declared here",
+        "operationId" : "healthCheck",
+        "responses" : {
+          "200" : {
+            "description" : "RA is healthy"
+          },
+          "500" : {
+            "description" : "RA is not healthy"
+          }
+        }
+      }
+    },
     "/status" : {
       "post" : {
         "tags" : [ "OTP administration" ],
@@ -516,76 +586,6 @@
           }
         }
       }
-    },
-    "/remove" : {
-      "post" : {
-        "tags" : [ "OTP administration" ],
-        "summary" : "Removes BankID App from an end user",
-        "description" : "Removes BankID App as an end user's OTP mechanism for at least one of his BankIDs in a given bank",
-        "operationId" : "removeBappOtp",
-        "parameters" : [ {
-          "name" : "Signature",
-          "in" : "header",
-          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
-        }, {
-          "name" : "Date",
-          "in" : "header",
-          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
-        }, {
-          "name" : "Digest",
-          "in" : "header",
-          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/AuthenticationBody"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "If status returned is valid",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DeleteBappResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "In case of error"
-          },
-          "500" : {
-            "description" : "In case of error",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SimpleErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components" : {
@@ -595,9 +595,9 @@
         "properties" : {
           "type" : {
             "type" : "string",
-            "description" : "Type of distribution<ul><li> - email:  1-3 unmasked characters + \"(...)\" @ domain.topdomain, eg. dei(...)@gmail.com </li><li> - official_address: No hint, details on the address must not be exposed. </li></ul>",
+            "description" : "Type of distribution<ul><li> - email:  1-3 unmasked characters + \"(...)\" @ domain.topdomain, eg. dei(...)@gmail.com </li><li> - postal: No hint, details on the address must not be exposed. </li></ul>",
             "example" : "email",
-            "enum" : [ "email", "official_address" ]
+            "enum" : [ "email", "postal" ]
           },
           "id" : {
             "type" : "string",
@@ -607,18 +607,38 @@
             "type" : "string",
             "description" : "Hint to user, ex. \"que****@hotmail.com\" or empty string on official_address"
           },
-          "last_verified" : {
+          "last_confirmed_by_user" : {
             "type" : "integer",
-            "description" : "When was this contact information last verified by the user, ms since epoch, UTC",
+            "description" : "When was this contact information last confirmed to be correct by the user, ms since epoch, UTC",
             "format" : "int64"
           },
           "last_modified" : {
             "type" : "integer",
-            "description" : "When was this contact information last modified by the user, ms since epoch, UTC",
+            "description" : "When was this contact information last modified, ms since epoch, UTC",
             "format" : "int64"
           }
         },
         "description" : "Declaration for Methods for distribution and "
+      },
+      "MsisdnReference" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "An opaque reference which will be used as an alias for the msisdn."
+          },
+          "last_confirmed_by_user" : {
+            "type" : "integer",
+            "description" : "When was msisdn last confirmed to be correct by the user, ms since epoch, UTC",
+            "format" : "int64"
+          },
+          "last_modified" : {
+            "type" : "integer",
+            "description" : "When was msisdn last modified, ms since epoch, UTC",
+            "format" : "int64"
+          }
+        },
+        "description" : "If the msisdn given in the request is correct, return a MsisdnReference object otherwise msisdn_reference=null."
       },
       "SelfServiceCheckUserResponse" : {
         "type" : "object",
@@ -628,9 +648,8 @@
             "description" : "Time when the user's password was last reset, ms since epoch, UTC",
             "format" : "int64"
           },
-          "correct_msisdn" : {
-            "type" : "boolean",
-            "description" : "True if the given phone number matches the what is registered for the given user"
+          "msisdn_reference" : {
+            "$ref" : "#/components/schemas/MsisdnReference"
           },
           "distribution_methods" : {
             "type" : "array",
@@ -668,7 +687,7 @@
         },
         "description" : "Phone number to standard: <a href=\"https://www.itu.int/rec/T-REC-E.164-201011-I/en\">T-REC-E.164-201011-I</a>"
       },
-      "SelfServiceCheckuserRequestBody" : {
+      "SelfServiceCheckUserRequestBody" : {
         "type" : "object",
         "properties" : {
           "client_name" : {
@@ -730,8 +749,9 @@
             "description" : "The id of this activation attempt, used for for logging, will be the same for both codes",
             "format" : "uuid"
           },
-          "msisdn" : {
-            "$ref" : "#/components/schemas/Msisdn"
+          "msisdn_reference_id" : {
+            "type" : "string",
+            "description" : "The alias for the msisdn previously provided in a response from check-user"
           },
           "locale" : {
             "type" : "string",
@@ -955,16 +975,16 @@
         },
         "description" : "Details of one distribution method used during activation."
       },
-      "AddBappResponse" : {
+      "DeleteBappResponse" : {
         "type" : "object",
         "properties" : {
           "status" : {
             "type" : "string",
-            "description" : "Status value for add operation<ul><li>ENABLED - BAPP is enabled for the end user</li><li>NOT_ENABLED - Failed to enable BAPP for the customer</li><li>ALREADY_ENABLED - BAPP was already enabled</li><li>NOT_AVAILABLE - BAPP is not available for the bank</li><li>BANK_ID_NOT_AVAILABLE - end user doesn't have active BankID</li><li>BLOCKED_BY_BANK - end user is not allowed to use BAPP</li><li>BLOCKED_IN_ODS - BAPP is connected to the BankID, but was blocked by ODS because of wrong attempts</li></ul>",
-            "enum" : [ "ENABLED", "NOT_ENABLED", "ALREADY_ENABLED", "NOT_AVAILABLE", "BANK_ID_NOT_AVAILABLE", "BLOCKED_BY_BANK", "BLOCKED_IN_ODS" ]
+            "description" : "Status value for the delete operation <ul><li>DELETED - BAPP was successfully deleted</li><li>NOT_ENABLED - BAPP hasn't been enabled for the end user, nothing to delete.</li><li>BLOCKED_IN_ODS - BAPP wasn't deleted, since it is present and blocked by ODS because of wrong attempts</li></ul>",
+            "enum" : [ "DELETED", "NOT_ENABLED", "BLOCKED_IN_ODS" ]
           }
         },
-        "description" : "The result of trying to enable BankID app for an end user's BankID"
+        "description" : "The result of trying to remove BankID app from an end user's BankID "
       },
       "AuthenticationBody" : {
         "type" : "object",
@@ -992,6 +1012,17 @@
         },
         "description" : "Minimal body for authenticating and authorizing a request"
       },
+      "AddBappResponse" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "description" : "Status value for add operation<ul><li>ENABLED - BAPP is enabled for the end user</li><li>NOT_ENABLED - Failed to enable BAPP for the customer</li><li>ALREADY_ENABLED - BAPP was already enabled</li><li>NOT_AVAILABLE - BAPP is not available for the bank</li><li>BANK_ID_NOT_AVAILABLE - end user doesn't have active BankID</li><li>BLOCKED_BY_BANK - end user is not allowed to use BAPP</li><li>BLOCKED_IN_ODS - BAPP is connected to the BankID, but was blocked by ODS because of wrong attempts</li></ul>",
+            "enum" : [ "ENABLED", "NOT_ENABLED", "ALREADY_ENABLED", "NOT_AVAILABLE", "BANK_ID_NOT_AVAILABLE", "BLOCKED_BY_BANK", "BLOCKED_IN_ODS" ]
+          }
+        },
+        "description" : "The result of trying to enable BankID app for an end user's BankID"
+      },
       "StatusBappResponse" : {
         "type" : "object",
         "properties" : {
@@ -1002,17 +1033,6 @@
           }
         },
         "description" : "The result of asking if BankID app is enabled for an end user's BankID"
-      },
-      "DeleteBappResponse" : {
-        "type" : "object",
-        "properties" : {
-          "status" : {
-            "type" : "string",
-            "description" : "Status value for the delete operation <ul><li>DELETED - BAPP was successfully deleted</li><li>NOT_ENABLED - BAPP hasn't been enabled for the end user, nothing to delete.</li><li>BLOCKED_IN_ODS - BAPP wasn't deleted, since it is present and blocked by ODS because of wrong attempts</li></ul>",
-            "enum" : [ "DELETED", "NOT_ENABLED", "BLOCKED_IN_ODS" ]
-          }
-        },
-        "description" : "The result of trying to remove BankID app from an end user's BankID "
       }
     }
   }

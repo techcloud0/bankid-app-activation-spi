@@ -208,7 +208,7 @@ public interface RaRequirements {
                     required = true)
             @HeaderParam(DIGEST) String digest,
             @RequestBody(description = "Activation code and how to distribute", required = true)
-                    SelfServiceCheckuserRequestBody selfserviceCheckuserRequestBody
+                    SelfServiceCheckUserRequestBody selfserviceCheckuserRequestBody
     );
 
     @Operation(summary = "Request distribution of a verification code to be sent to an end user."
