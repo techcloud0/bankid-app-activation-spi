@@ -173,7 +173,7 @@ public interface RaRequirements {
                     @ApiResponse(
                             responseCode = "500",
                             description = "RA is not healthy")}
-            , tags = {"Service availability"})
+            , tags = {SERVICE_AVAILABILITY})
     @Path("healthcheck")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
