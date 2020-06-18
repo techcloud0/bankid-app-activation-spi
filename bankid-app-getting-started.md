@@ -16,9 +16,3 @@ In return we will provide
 
 Please make sure that the requests from the Vipps server are allowed through firewalls etc. 
 
-
-[comment]: # (Heter det vipps support eller BankID support ?? )
- 
-[comment]: # (Lage sak for generelle header navn ?? )
-
-[comment]: # (url for bapp admin snitt og client id+secret ?? )

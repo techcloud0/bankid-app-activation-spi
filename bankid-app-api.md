@@ -12,8 +12,6 @@ Please see the BankID Core (COI) documentation for more information regarding th
 Vipps offers an administration API allowing the bank issuing BankIDs to query if an end user has activated BankID app, and to enable/disable the app for a given end user.
 Security is provided by OpenID connect (OIDC) access tokens, issued by BankID OIDC.
 
-[comment]: # (TODO: should be described)
-
 ## BankID RA SPI endpoints required by Vipps
 In order for Vipps to request BankID app to be added as an HA2-mechanism to an enduser's BankID, the bank must implement the SPI 
 described here. 
