@@ -35,7 +35,7 @@ translated into _FALSE_ when using the .yaml file and that causes errors.
 
 Detailed description of the request endpoints are found in the SPI reference documentation as [Swagger](https://vippsas.github.io/bankid-app-api/) or [ReDoc](https://vippsas.github.io/bankid-app-api/redoc.html).
 
-Endpoints are grouped by functionality. RA may implement all or some of these groups, depending on the functionality the RA support. 
+Endpoints are grouped by functionality. RA may implement all or some of these groups, depending on the functionality the RA supports. 
 
 # Questions?
 

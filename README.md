@@ -6,7 +6,7 @@ End users having one or more NetCentric BankIDs may use BankID App as an HA2 mec
 
 Controlling OTP mechanisms is the bank's RA responsibility. Vipps does not access the BankID ODS system.
 
-If the bank open it's RA for calls from Vipps, then end users may activate and connect BankID APP 
+If the bank opens it's RA for calls from Vipps, then end users may activate and connect BankID APP 
 to their Netcentric BankID with no manual interaction from the bank. 
 
 ### Vipps using RA
@@ -15,7 +15,7 @@ Activating the BankID APP requires that the end user authenticates using BankID 
 will call the BankID issuing RA to enable BankID App as an additional OTP mechanism.
 
 The RA may implement different degrees of functionality  
-* _OTP Administration_ which is the basic operations used by Vipps to to enable or disable BankID App as an OTP mechanism.
+* _OTP Administration_ which is the basic operations used by Vipps to enable or disable BankID App as an OTP mechanism.
 * _Activation without Code Device_ which enables usecases where the end user does not have another code device.   
 
 Supporting the basic _OTP administration_ SPI is sufficient to add BankID App to end users already having a Netcentric BankID.
