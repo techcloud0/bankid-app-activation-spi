@@ -3,9 +3,10 @@
 The BankID app is an HA2-mechanism (OTP) in the BankID infrastructure. The name of this HA2-mechanism is _bapp_.
 The RA-system of the bank issuing the enduser's BankID must support the _bapp_ HA2-mechanism. 
 
-When an enduser downloads and activates the BankID app, Vipps will, if automatic integration is set up, send 
-one or more requests to the enduser's BankID issuing bank to add the _bapp_ HA2 mechanism to the BankID. Please see the 
-BankID Core (COI) documentation for more information regarding the BankID HA2 mechanism.
+When an enduser downloads and activates the BankID app, Vipps will send one or more requests to the end user's 
+BankID issuing RA to add the _bapp_ HA2 mechanism to the end user's NetCentric BankID. 
+RA should then issue an OTPAdd against BankID ODS. 
+Please see the BankID Core (COI) documentation for more information regarding the BankID HA2 mechanism.
 
 ## BankID app API endpoints offered by Vipps
 Vipps offers an administration API allowing the bank issuing BankIDs to query if an end user has activated BankID app, and to enable/disable the app for a given end user.
