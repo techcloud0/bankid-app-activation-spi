@@ -22,6 +22,143 @@
     "name" : "Activation without Code Device - Self Service"
   } ],
   "paths" : {
+    "/notify_user_of_activation" : {
+      "post" : {
+        "tags" : [ "Activation without Code Device" ],
+        "summary" : "Tell end user that BankID App is activated",
+        "description" : "Request notification of the end user that his BankID App instance is activated",
+        "operationId" : "notifyUserOfActivation",
+        "parameters" : [ {
+          "name" : "Signature",
+          "in" : "header",
+          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
+        }, {
+          "name" : "Date",
+          "in" : "header",
+          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
+        }, {
+          "name" : "Digest",
+          "in" : "header",
+          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
+        } ],
+        "requestBody" : {
+          "description" : "Activation code metadata",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NotifyUserOfActivationRequestBodyDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "If all ok, no data is returned"
+          },
+          "400" : {
+            "description" : "In case of error"
+          },
+          "500" : {
+            "description" : "In case of error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotifyUserOfActivationErrorResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/selfservice/check_user" : {
+      "post" : {
+        "tags" : [ "Activation without Code Device - Self Service" ],
+        "summary" : "Check two-channel options for end user",
+        "description" : "<p>Endpoint to check if a specific user is eligible from single originator for self-service activation.</p><p>The RA should check if the provided phone number is registered for the user, but return the other information regardless.",
+        "operationId" : "selfServiceCheckUser",
+        "parameters" : [ {
+          "name" : "Signature",
+          "in" : "header",
+          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
+        }, {
+          "name" : "Date",
+          "in" : "header",
+          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
+        }, {
+          "name" : "Digest",
+          "in" : "header",
+          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
+        } ],
+        "requestBody" : {
+          "description" : "Activation code and how to distribute",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SelfServiceCheckUserRequestBodyDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "If status returned is valid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SelfServiceCheckUserResponseDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "In case of error"
+          },
+          "500" : {
+            "description" : "In case of error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SimpleErrorResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/selfservice/send_verification_code" : {
       "post" : {
         "tags" : [ "Activation without Code Device - Self Service" ],
@@ -62,6 +199,71 @@
             "application/json" : {
               "schema" : {
                 "$ref" : "#/components/schemas/SendVerificationCodeRequestBodyDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "If all ok, no data is returned"
+          },
+          "400" : {
+            "description" : "In case of error"
+          },
+          "500" : {
+            "description" : "In case of error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SimpleErrorResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/selfservice/send_code_words" : {
+      "post" : {
+        "tags" : [ "Activation without Code Device - Self Service" ],
+        "summary" : "Send codewords to an end user",
+        "description" : "request distribution of code words to be sent to a user. Upon receiving a request on this end-point, the RA should distribute the provided code through the channel indicated, or return an error-code.",
+        "operationId" : "selfServiceSendCodeWords",
+        "parameters" : [ {
+          "name" : "Signature",
+          "in" : "header",
+          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
+        }, {
+          "name" : "Date",
+          "in" : "header",
+          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
+        }, {
+          "name" : "Digest",
+          "in" : "header",
+          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
+        } ],
+        "requestBody" : {
+          "description" : "Activation codes and how to distribute",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SendCodeWordsRequestBodyDTO"
               }
             }
           },
@@ -159,208 +361,6 @@
         }
       }
     },
-    "/notify_user_of_activation" : {
-      "post" : {
-        "tags" : [ "Activation without Code Device" ],
-        "summary" : "Tell end user that BankID App is activated",
-        "description" : "Request notification of the end user that his BankID App instance is activated",
-        "operationId" : "notifyUserOfActivation",
-        "parameters" : [ {
-          "name" : "Signature",
-          "in" : "header",
-          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
-        }, {
-          "name" : "Date",
-          "in" : "header",
-          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
-        }, {
-          "name" : "Digest",
-          "in" : "header",
-          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
-        } ],
-        "requestBody" : {
-          "description" : "Activation code metadata",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/NotifyUserOfActivationRequestBodyDTO"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "200" : {
-            "description" : "If all ok, no data is returned"
-          },
-          "400" : {
-            "description" : "In case of error"
-          },
-          "500" : {
-            "description" : "In case of error",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/NotifyUserOfActivationErrorResponseDTO"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/selfservice/send_code_words" : {
-      "post" : {
-        "tags" : [ "Activation without Code Device - Self Service" ],
-        "summary" : "Send codewords to an end user",
-        "description" : "request distribution of code words to be sent to a user. Upon receiving a request on this end-point, the RA should distribute the provided code through the channel indicated, or return an error-code.",
-        "operationId" : "selfServiceSendCodeWords",
-        "parameters" : [ {
-          "name" : "Signature",
-          "in" : "header",
-          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
-        }, {
-          "name" : "Date",
-          "in" : "header",
-          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
-        }, {
-          "name" : "Digest",
-          "in" : "header",
-          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
-        } ],
-        "requestBody" : {
-          "description" : "Activation codes and how to distribute",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/SendCodeWordsRequestBodyDTO"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "200" : {
-            "description" : "If all ok, no data is returned"
-          },
-          "400" : {
-            "description" : "In case of error"
-          },
-          "500" : {
-            "description" : "In case of error",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SimpleErrorResponseDTO"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/selfservice/check_user" : {
-      "post" : {
-        "tags" : [ "Activation without Code Device - Self Service" ],
-        "summary" : "Check two-channel options for end user",
-        "description" : "<p>Endpoint to check if a specific user is eligible from single originator for self-service activation.</p><p>The RA should check if the provided phone number is registered for the user, but return the other information regardless.",
-        "operationId" : "selfServiceCheckUser",
-        "parameters" : [ {
-          "name" : "Signature",
-          "in" : "header",
-          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
-        }, {
-          "name" : "Date",
-          "in" : "header",
-          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
-        }, {
-          "name" : "Digest",
-          "in" : "header",
-          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
-        } ],
-        "requestBody" : {
-          "description" : "Activation code and how to distribute",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/SelfServiceCheckUserRequestBodyDTO"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "200" : {
-            "description" : "If status returned is valid",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SelfServiceCheckUserResponseDTO"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "In case of error"
-          },
-          "500" : {
-            "description" : "In case of error",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SimpleErrorResponseDTO"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/add" : {
       "post" : {
         "tags" : [ "OTP administration" ],
@@ -411,76 +411,6 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/AddBappResponseDTO"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "In case of error"
-          },
-          "500" : {
-            "description" : "In case of error",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SimpleErrorResponseDTO"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/remove" : {
-      "post" : {
-        "tags" : [ "OTP administration" ],
-        "summary" : "Removes BankID App from an end user",
-        "description" : "Removes BankID App as an end user's OTP mechanism for at least one of his BankIDs in a given bank",
-        "operationId" : "removeBappOtp",
-        "parameters" : [ {
-          "name" : "Signature",
-          "in" : "header",
-          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
-        }, {
-          "name" : "Date",
-          "in" : "header",
-          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
-        }, {
-          "name" : "Digest",
-          "in" : "header",
-          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          },
-          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/AuthenticationBodyDTO"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "If status returned is valid",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DeleteBappResponseDTO"
                 }
               }
             }
@@ -571,6 +501,76 @@
         }
       }
     },
+    "/remove" : {
+      "post" : {
+        "tags" : [ "OTP administration" ],
+        "summary" : "Removes BankID App from an end user",
+        "description" : "Removes BankID App as an end user's OTP mechanism for at least one of his BankIDs in a given bank",
+        "operationId" : "removeBappOtp",
+        "parameters" : [ {
+          "name" : "Signature",
+          "in" : "header",
+          "description" : "The Signature element, as described in <a href=\"https://tools.ietf.org/html/draft-cavage-http-signatures-12\">Internet-Draft - Signing HTTP Messages</a>.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "keyId=\"fa998090\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"o7zK892....\""
+        }, {
+          "name" : "Date",
+          "in" : "header",
+          "description" : "The date element, required format is the format named 'preferred' specified in <a href=\"https://tools.ietf.org/html/rfc7231#section-7.1.1.1\">RFC 7231 - Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>.<p><b>Implementation tips:</b> Format in Java is 'EEE, dd MMM yyyy HH:mm:ss zzz', locale english.</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "Mon, 16 Sep 2019 12:12:21 GMT"
+        }, {
+          "name" : "Digest",
+          "in" : "header",
+          "description" : "SHA-256 hash of body<p><b>Implementation tips:</b>MessageDigest.getIinstance(\"SHA-256\") in Java returns an object which is not thread safe</p>",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE="
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AuthenticationBodyDTO"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "If status returned is valid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteBappResponseDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "In case of error"
+          },
+          "500" : {
+            "description" : "In case of error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SimpleErrorResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthcheck" : {
       "get" : {
         "tags" : [ "Service availability" ],
@@ -590,112 +590,6 @@
   },
   "components" : {
     "schemas" : {
-      "SimpleErrorResponseDTO" : {
-        "type" : "object",
-        "properties" : {
-          "error" : {
-            "type" : "string"
-          }
-        },
-        "description" : "Result when there is only an error code in return"
-      },
-      "SendVerificationCodeRequestBodyDTO" : {
-        "type" : "object",
-        "properties" : {
-          "client_name" : {
-            "type" : "string",
-            "description" : "Name of client sending the request",
-            "example" : "vipps-bapp-client"
-          },
-          "request_id" : {
-            "type" : "string",
-            "description" : "A unique identifier pr. request, used for log correlation",
-            "example" : "e6dccaf0-c72f-48d9-9dc8-665e51e08e47"
-          },
-          "originator_id" : {
-            "type" : "string",
-            "description" : "Originator/bank-number for end user's bankID, valid BankID ODS number",
-            "example" : "9980"
-          },
-          "nnin" : {
-            "type" : "string",
-            "description" : "End user's Norwegian national identification number, string of 11 digits",
-            "example" : "11111111016"
-          },
-          "activation_id" : {
-            "type" : "string",
-            "description" : "The id of this activation attempt, used for for logging, will be the same for both codes",
-            "format" : "uuid"
-          },
-          "msisdn_reference_id" : {
-            "type" : "string",
-            "description" : "The alias for the msisdn previously provided in a response from check-user"
-          },
-          "locale" : {
-            "type" : "string",
-            "description" : "Locale of initiating app, either \"no\" for Norwegian and Norwegian dialects, otherwise \"en\"<h5>(the 'no' value is shown as 'false', openapi nuisance)</h5>",
-            "example" : "en",
-            "enum" : [ "no", "en" ]
-          },
-          "verification_code" : {
-            "type" : "string",
-            "description" : "Four digit code"
-          },
-          "exp" : {
-            "type" : "integer",
-            "description" : "Time when code expire, ms since epoch, UTC",
-            "format" : "int64"
-          }
-        },
-        "description" : "Request body content for asking an RA to send verification code to end user"
-      },
-      "PasswordQuarantineResponseDTO" : {
-        "type" : "object",
-        "properties" : {
-          "pw_reset_timestamp" : {
-            "type" : "integer",
-            "description" : "Time when user's password was last reset, ms since epoch, UTC",
-            "format" : "int64"
-          }
-        },
-        "description" : "Response when quarantining an end user password"
-      },
-      "PasswordQuarantineRequestBodyDTO" : {
-        "type" : "object",
-        "properties" : {
-          "client_name" : {
-            "type" : "string",
-            "description" : "Name of client sending the request",
-            "example" : "vipps-bapp-client"
-          },
-          "request_id" : {
-            "type" : "string",
-            "description" : "A unique identifier pr. request, used for log correlation",
-            "example" : "e6dccaf0-c72f-48d9-9dc8-665e51e08e47"
-          },
-          "originator_id" : {
-            "type" : "string",
-            "description" : "Originator/bank-number for end user's bankID, valid BankID ODS number",
-            "example" : "9980"
-          },
-          "nnin" : {
-            "type" : "string",
-            "description" : "End user's Norwegian national identification number, string of 11 digits",
-            "example" : "11111111016"
-          },
-          "activation_id" : {
-            "type" : "string",
-            "description" : "The id of this activation attempt, used for for logging",
-            "format" : "uuid"
-          },
-          "quarantine_until" : {
-            "type" : "integer",
-            "description" : "Time when quarantine expire, ms since epoch, UTC",
-            "format" : "int64"
-          }
-        },
-        "description" : "Request body content for quarantining the user password"
-      },
       "NotifyUserOfActivationErrorResponseDTO" : {
         "type" : "object",
         "properties" : {
@@ -803,56 +697,6 @@
         },
         "description" : "Details of one distribution method used during activation."
       },
-      "SendCodeWordsRequestBodyDTO" : {
-        "type" : "object",
-        "properties" : {
-          "client_name" : {
-            "type" : "string",
-            "description" : "Name of client sending the request",
-            "example" : "vipps-bapp-client"
-          },
-          "request_id" : {
-            "type" : "string",
-            "description" : "A unique identifier pr. request, used for log correlation",
-            "example" : "e6dccaf0-c72f-48d9-9dc8-665e51e08e47"
-          },
-          "originator_id" : {
-            "type" : "string",
-            "description" : "Originator/bank-number for end user's bankID, valid BankID ODS number",
-            "example" : "9980"
-          },
-          "nnin" : {
-            "type" : "string",
-            "description" : "End user's Norwegian national identification number, string of 11 digits",
-            "example" : "11111111016"
-          },
-          "activation_id" : {
-            "type" : "string",
-            "description" : "The id of this activation attempt, used for for logging, will be the same for both codes",
-            "format" : "uuid"
-          },
-          "distribution_method" : {
-            "type" : "string",
-            "description" : "One of the method identifiers returned from selfservice/check_user call"
-          },
-          "locale" : {
-            "type" : "string",
-            "description" : "Locale of initiating app, either \"no\" for Norwegian and Norwegian dialects, otherwise \"en\"<h5>(the 'no' value is shown as 'false', openapi nuisance)</h5>",
-            "example" : "en",
-            "enum" : [ "no", "en" ]
-          },
-          "code_words" : {
-            "type" : "string",
-            "description" : "The two code words to distribute"
-          },
-          "exp" : {
-            "type" : "integer",
-            "description" : "Time when code expire, ms since epoch, UTC",
-            "format" : "int64"
-          }
-        },
-        "description" : "Request body content for asking an RA to send code words to an end user"
-      },
       "DistributionMethodDTO" : {
         "type" : "object",
         "properties" : {
@@ -929,6 +773,15 @@
         },
         "description" : "The result of querying RA about end user distribution methods"
       },
+      "SimpleErrorResponseDTO" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Result when there is only an error code in return"
+      },
       "MsisdnDTO" : {
         "type" : "object",
         "properties" : {
@@ -980,6 +833,153 @@
         },
         "description" : "Request body content for asking an RA about end user distribution methods"
       },
+      "SendVerificationCodeRequestBodyDTO" : {
+        "type" : "object",
+        "properties" : {
+          "client_name" : {
+            "type" : "string",
+            "description" : "Name of client sending the request",
+            "example" : "vipps-bapp-client"
+          },
+          "request_id" : {
+            "type" : "string",
+            "description" : "A unique identifier pr. request, used for log correlation",
+            "example" : "e6dccaf0-c72f-48d9-9dc8-665e51e08e47"
+          },
+          "originator_id" : {
+            "type" : "string",
+            "description" : "Originator/bank-number for end user's bankID, valid BankID ODS number",
+            "example" : "9980"
+          },
+          "nnin" : {
+            "type" : "string",
+            "description" : "End user's Norwegian national identification number, string of 11 digits",
+            "example" : "11111111016"
+          },
+          "activation_id" : {
+            "type" : "string",
+            "description" : "The id of this activation attempt, used for for logging, will be the same for both codes",
+            "format" : "uuid"
+          },
+          "msisdn_reference_id" : {
+            "type" : "string",
+            "description" : "The alias for the msisdn previously provided in a response from check-user"
+          },
+          "locale" : {
+            "type" : "string",
+            "description" : "Locale of initiating app, either \"no\" for Norwegian and Norwegian dialects, otherwise \"en\"<h5>(the 'no' value is shown as 'false', openapi nuisance)</h5>",
+            "example" : "en",
+            "enum" : [ "no", "en" ]
+          },
+          "verification_code" : {
+            "type" : "string",
+            "description" : "Four digit code"
+          },
+          "exp" : {
+            "type" : "integer",
+            "description" : "Time when code expire, ms since epoch, UTC",
+            "format" : "int64"
+          }
+        },
+        "description" : "Request body content for asking an RA to send verification code to end user"
+      },
+      "SendCodeWordsRequestBodyDTO" : {
+        "type" : "object",
+        "properties" : {
+          "client_name" : {
+            "type" : "string",
+            "description" : "Name of client sending the request",
+            "example" : "vipps-bapp-client"
+          },
+          "request_id" : {
+            "type" : "string",
+            "description" : "A unique identifier pr. request, used for log correlation",
+            "example" : "e6dccaf0-c72f-48d9-9dc8-665e51e08e47"
+          },
+          "originator_id" : {
+            "type" : "string",
+            "description" : "Originator/bank-number for end user's bankID, valid BankID ODS number",
+            "example" : "9980"
+          },
+          "nnin" : {
+            "type" : "string",
+            "description" : "End user's Norwegian national identification number, string of 11 digits",
+            "example" : "11111111016"
+          },
+          "activation_id" : {
+            "type" : "string",
+            "description" : "The id of this activation attempt, used for for logging, will be the same for both codes",
+            "format" : "uuid"
+          },
+          "distribution_method" : {
+            "type" : "string",
+            "description" : "One of the method identifiers returned from selfservice/check_user call"
+          },
+          "locale" : {
+            "type" : "string",
+            "description" : "Locale of initiating app, either \"no\" for Norwegian and Norwegian dialects, otherwise \"en\"<h5>(the 'no' value is shown as 'false', openapi nuisance)</h5>",
+            "example" : "en",
+            "enum" : [ "no", "en" ]
+          },
+          "code_words" : {
+            "type" : "string",
+            "description" : "The two code words to distribute"
+          },
+          "exp" : {
+            "type" : "integer",
+            "description" : "Time when code expire, ms since epoch, UTC",
+            "format" : "int64"
+          }
+        },
+        "description" : "Request body content for asking an RA to send code words to an end user"
+      },
+      "PasswordQuarantineResponseDTO" : {
+        "type" : "object",
+        "properties" : {
+          "pw_reset_timestamp" : {
+            "type" : "integer",
+            "description" : "Time when user's password was last reset, ms since epoch, UTC",
+            "format" : "int64"
+          }
+        },
+        "description" : "Response when quarantining an end user password"
+      },
+      "PasswordQuarantineRequestBodyDTO" : {
+        "type" : "object",
+        "properties" : {
+          "client_name" : {
+            "type" : "string",
+            "description" : "Name of client sending the request",
+            "example" : "vipps-bapp-client"
+          },
+          "request_id" : {
+            "type" : "string",
+            "description" : "A unique identifier pr. request, used for log correlation",
+            "example" : "e6dccaf0-c72f-48d9-9dc8-665e51e08e47"
+          },
+          "originator_id" : {
+            "type" : "string",
+            "description" : "Originator/bank-number for end user's bankID, valid BankID ODS number",
+            "example" : "9980"
+          },
+          "nnin" : {
+            "type" : "string",
+            "description" : "End user's Norwegian national identification number, string of 11 digits",
+            "example" : "11111111016"
+          },
+          "activation_id" : {
+            "type" : "string",
+            "description" : "The id of this activation attempt, used for for logging",
+            "format" : "uuid"
+          },
+          "quarantine_until" : {
+            "type" : "integer",
+            "description" : "Time when quarantine expire, ms since epoch, UTC",
+            "format" : "int64"
+          }
+        },
+        "description" : "Request body content for quarantining the user password"
+      },
       "AddBappResponseDTO" : {
         "type" : "object",
         "properties" : {
@@ -1017,17 +1017,6 @@
         },
         "description" : "Minimal body for authenticating and authorizing a request"
       },
-      "DeleteBappResponseDTO" : {
-        "type" : "object",
-        "properties" : {
-          "status" : {
-            "type" : "string",
-            "description" : "Status value for the delete operation <ul><li>DELETED - BAPP was successfully deleted</li><li>NOT_ENABLED - BAPP hasn't been enabled for the end user, nothing to delete.</li><li>BLOCKED_IN_ODS - BAPP wasn't deleted, since it is present and blocked by ODS because of wrong attempts</li></ul>",
-            "enum" : [ "DELETED", "NOT_ENABLED", "BLOCKED_IN_ODS" ]
-          }
-        },
-        "description" : "The result of trying to remove BankID app from an end user's BankID "
-      },
       "StatusBappResponseDTO" : {
         "type" : "object",
         "properties" : {
@@ -1038,6 +1027,17 @@
           }
         },
         "description" : "The result of asking if BankID app is enabled for an end user's BankID"
+      },
+      "DeleteBappResponseDTO" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "description" : "Status value for the delete operation <ul><li>DELETED - BAPP was successfully deleted</li><li>NOT_ENABLED - BAPP hasn't been enabled for the end user, nothing to delete.</li><li>BLOCKED_IN_ODS - BAPP wasn't deleted, since it is present and blocked by ODS because of wrong attempts</li></ul>",
+            "enum" : [ "DELETED", "NOT_ENABLED", "BLOCKED_IN_ODS" ]
+          }
+        },
+        "description" : "The result of trying to remove BankID app from an end user's BankID "
       }
     }
   }
