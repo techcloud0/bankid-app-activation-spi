@@ -1,4 +1,4 @@
-package no.bankid.outgoing.ra;
+package no.bankid.outgoing.ra.otpadministration;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

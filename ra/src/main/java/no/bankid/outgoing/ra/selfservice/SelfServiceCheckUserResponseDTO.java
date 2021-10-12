@@ -1,6 +1,7 @@
-package no.bankid.outgoing.ra;
+package no.bankid.outgoing.ra.selfservice;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import no.bankid.outgoing.ra.otpadministration.StatusBappResponseDTO;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class SelfServiceCheckUserResponseDTO {
         public DistributeBy type;
         @Schema(description = "An id for this distribution method, must be unique within this response")
         public String id;
-        @Schema(description = "Hint to user, ex. \"que****@hotmail.com\" or empty string on official_address")
+        @Schema(description = "Hint to user, ex. \"que(...)@hotmail.com\" or empty string on official_address")
         public String hint;
         @Schema(description = "When was this contact information last confirmed to be correct by the user, ms since epoch, UTC")
         public long last_confirmed_by_user;

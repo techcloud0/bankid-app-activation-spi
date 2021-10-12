@@ -10,19 +10,22 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.bankid.incoming.ra.callback.ActivationValidationCallbackRequestDTO;
+import no.bankid.incoming.ra.rainit.RaInitiatedActivationRequestDTO;
+import no.bankid.incoming.ra.rainit.RaInitiatedActivationResponseDTO;
+import no.bankid.outgoing.ra.bidadministration.IssueRequestDTO;
+import no.bankid.outgoing.ra.bidadministration.IssueStatusRequestDTO;
+import no.bankid.outgoing.ra.bidadministration.IssueStatusResponseDTO;
+import no.bankid.outgoing.ra.otpadministration.AddBappResponseDTO;
+import no.bankid.outgoing.ra.otpadministration.DeleteBappResponseDTO;
+import no.bankid.outgoing.ra.otpadministration.StatusBappResponseDTO;
+import no.bankid.outgoing.ra.selfservice.*;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static no.bankid.outgoing.ra.HttpSignatureHeaders.DATE;
-import static no.bankid.outgoing.ra.HttpSignatureHeaders.DIGEST;
-import static no.bankid.outgoing.ra.HttpSignatureHeaders.SIGNATURE;
+import static no.bankid.outgoing.ra.HttpSignatureHeaders.*;
 
 @OpenAPIDefinition(
         info = @Info(
@@ -48,8 +51,10 @@ import static no.bankid.outgoing.ra.HttpSignatureHeaders.SIGNATURE;
                 @Tag(name = RaRequirements.OTP_ADMINISTRATION,
                         description = "Adds or deletes BankID App from an end user's BankID"),
                 @Tag(name = RaRequirements.ACTIVATION_WITHOUT_CODE_DEVICE),
-                @Tag(name = RaRequirements.ACTIVATION_WITHOUT_CODE_DEVICE_SELF_SERVICE)
-
+                @Tag(name = RaRequirements.ACTIVATION_WITHOUT_CODE_DEVICE_SELF_SERVICE),
+                @Tag(name = RaRequirements.BANK_ID_PROVISIONING, description = "Ra actions involved in provisioning flows."),
+                @Tag(name = RaRequirements.CALLBACKS, description = "These are callbacks which BankID-app implement and must be called by the RA."),
+                @Tag(name = RaRequirements.RA_INIT, description = "API which BankID-app implements and may be called by the RA.")
         },
         servers = {
                 @Server(description = "Preprod Ra-lite",
@@ -79,8 +84,11 @@ public interface RaRequirements {
 
     String ACTIVATION_WITHOUT_CODE_DEVICE = "Activation without Code Device";
     String ACTIVATION_WITHOUT_CODE_DEVICE_SELF_SERVICE = "Activation without Code Device - Self Service";
+    String BANK_ID_PROVISIONING = "BankID Provisioning";
     String OTP_ADMINISTRATION = "OTP administration";
     String SERVICE_AVAILABILITY = "Service availability";
+    String CALLBACKS = "BankID Provisioning Callbacks";
+    String RA_INIT = "BankID-app Provisioning API";
 
     @Operation(summary = "Adds BankID App to an end user"
             , description = "Adds BankID App to an end user's BankID OTP mechanisms in a given bank"
@@ -336,4 +344,125 @@ public interface RaRequirements {
             @RequestBody(description = "Activation code metadata", required = true)
                     NotifyUserOfActivationRequestBodyDTO notifyUserOfActivationRequestBody
     );
+
+    @Operation(summary = "Issue (or reissue) the user's BankID with a new temporary password"
+            , description = "Issue (or reissue) the user's BankID with a new temporary password."
+            , tags = {BANK_ID_PROVISIONING}
+    )
+    @ApiResponse(responseCode = "202", description = "If all ok, the request is accepted")
+    @ApiResponse(responseCode = "400", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponseDTO.class))
+    )
+    @Path("bankid_provisioning/issue")
+    @POST
+    Response issue(
+            @Parameter(description = DESCRIPTION_SIGNATURE,
+                    example = EXAMPLE_SIGNATURE,
+                    required = true)
+            @HeaderParam(SIGNATURE) String httpSignature,
+            @Parameter(description = DESCRIPTION_DATE,
+                    example = EXAMPLE_DATE,
+                    required = true)
+            @HeaderParam(DATE) String date,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
+                    required = true)
+            @HeaderParam(DIGEST) String digest,
+            @RequestBody(description = "Request that the user's BankID is (re-)issued.", required = true)
+                    IssueRequestDTO reissueReqest
+    );
+
+    @Operation(summary = "Get status of issue request"
+            , description = "Poll for the status of a pending issue request."
+            , tags = {BANK_ID_PROVISIONING}
+    )
+    @ApiResponse(responseCode = "200", description = "Returns the status of the (re-)issue request",
+            content = @Content(schema = @Schema(implementation = IssueStatusResponseDTO.class))
+    )
+    @ApiResponse(responseCode = "400", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponseDTO.class))
+    )
+    @Path("bankid_provisioning/issue/status")
+    @POST
+    Response issueStatus(
+            @Parameter(description = DESCRIPTION_SIGNATURE,
+                    example = EXAMPLE_SIGNATURE,
+                    required = true)
+            @HeaderParam(SIGNATURE) String httpSignature,
+            @Parameter(description = DESCRIPTION_DATE,
+                    example = EXAMPLE_DATE,
+                    required = true)
+            @HeaderParam(DATE) String date,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
+                    required = true)
+            @HeaderParam(DIGEST) String digest,
+            @RequestBody(description = "Request the current status of a pending (re-)issue request.", required = true)
+                    IssueStatusRequestDTO issueStatusRequest
+    );
+
+    @Operation(summary = "BankID issuance callback to BankID-app"
+            , description = "Callback to BankID-app informing of the status of a (re-)issue request. " +
+            "Any subsequent calls from BankID-app to /bankid_provisioning/issue/status, must return the same status as this request."
+            , tags = {CALLBACKS}
+    )
+    @ApiResponse(responseCode = "200", description = "Returns the status of the (re-)issue request")
+    @ApiResponse(responseCode = "400", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponseDTO.class))
+    )
+    @Path("ra/callbacks/bankid_provisioning/issue")
+    @POST
+    Response issueCallback(
+            @Parameter(description = DESCRIPTION_SIGNATURE,
+                    example = EXAMPLE_SIGNATURE,
+                    required = true)
+            @HeaderParam(SIGNATURE) String httpSignature,
+            @Parameter(description = DESCRIPTION_DATE,
+                    example = EXAMPLE_DATE,
+                    required = true)
+            @HeaderParam(DATE) String date,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
+                    required = true)
+            @HeaderParam(DIGEST) String digest,
+            @RequestBody(description = "Callback informing of the status of a issue request.", required = true)
+                    ActivationValidationCallbackRequestDTO issueCallback
+    );
+
+    @Operation(summary = "Start a RA-initiated QR-code activation session"
+            , description = "The RA may call this endpoint to start a new RA-initiated activation. " +
+            "If no order id is provided this will be a request for first time issuance and will initiate remote identity-proofing in BankID-app."
+            , tags = {RA_INIT}
+    )
+    @ApiResponse(responseCode = "200", description = "Success",
+            content = @Content(schema = @Schema(implementation = RaInitiatedActivationResponseDTO.class))
+    )
+    @ApiResponse(responseCode = "400", description = "In case of error")
+    @ApiResponse(responseCode = "500", description = "In case of error",
+            content = @Content(schema = @Schema(implementation = SimpleErrorResponseDTO.class))
+    )
+    @Path("ra/bankid_provisioning/qr")
+    @POST
+    Response rainitiated(
+            @Parameter(description = DESCRIPTION_SIGNATURE,
+                    example = EXAMPLE_SIGNATURE,
+                    required = true)
+            @HeaderParam(SIGNATURE) String httpSignature,
+            @Parameter(description = DESCRIPTION_DATE,
+                    example = EXAMPLE_DATE,
+                    required = true)
+            @HeaderParam(DATE) String date,
+            @Parameter(description = DESCRIPTION_DIGEST,
+                    example = EXAMPLE_DIGEST,
+                    required = true)
+            @HeaderParam(DIGEST) String digest,
+            @RequestBody(description = "Start a new QR-code activation session", required = true)
+                    RaInitiatedActivationRequestDTO request
+    );
+
+
 }
+

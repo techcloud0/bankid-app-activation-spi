@@ -34,13 +34,14 @@ public class NotifyUserOfActivationRequestBodyDTO extends AuthenticationBodyDTO 
 
         @Schema(description = "The flow used for activation, meanings:" +
                 "<ul>" +
-                "<li> - activation_code: A single activation code provided over a secure channel. </li>" +
-                "<li> - selfservice: Activation codes provided over two insecure channels. </li>" +
-                "<li> - bankid_auth: Activation through a BankID authentication. </li>" +
+                "<li> qr: A single activation QR-code provided over a secure channel. </li>" +
+                "<li> selfservice: Activation codes provided over two insecure channels. </li>" +
+                "<li> bankid_auth: Activation through a BankID authentication. </li>" +
+                "<li> id_check: Identity proofing through BankID id-check."+
                 "</ul>", example = "selfservice"
         )
         public enum FlowType {
-            activation_code, selfservice, bankid_auth
+            qr, selfservice, bankid_auth, id_check
         }
 
         public FlowType flow;
@@ -50,7 +51,7 @@ public class NotifyUserOfActivationRequestBodyDTO extends AuthenticationBodyDTO 
         public AppClientLocaleDTO locale;
         @Schema(description = "Map of localized strings explaining how the device was activated",
                 example = "{" +
-                        "\"no\": \"med aktiveringskoder gitt på email til que***@xyz.no og på sms til XXX XX X42\"," +
+                        "\"no\": \"med aktiveringskoder gitt pÃ¥ email til que***@xyz.no og pÃ¥ sms til XXX XX X42\"," +
                         "\"en\": \"using activation codes by email to que***@xyz.no and sms to XXX XX X42\"" +
                         "}")
         public Map<AppClientLocaleDTO, String> human_readable;

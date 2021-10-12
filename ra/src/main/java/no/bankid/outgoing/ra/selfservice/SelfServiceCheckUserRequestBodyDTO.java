@@ -1,6 +1,8 @@
-package no.bankid.outgoing.ra;
+package no.bankid.outgoing.ra.selfservice;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import no.bankid.outgoing.ra.AuthenticationBodyDTO;
+import no.bankid.outgoing.ra.MsisdnDTO;
 
 import java.util.UUID;
 
