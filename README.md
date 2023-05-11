@@ -1,0 +1,1 @@
+The documentation has been moved to https://github.com/BankIDNorge/bankid-app-activation-spi
